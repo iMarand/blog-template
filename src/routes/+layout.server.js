@@ -1,0 +1,38 @@
+import { db, schema } from '$lib/server/db/index.js';
+import { sql } from 'drizzle-orm';
+
+export async function load() {
+    // Get categories with post counts for the footer
+    const categories = db
+        .select({
+            id: schema.categories.id,
+            name: schema.categories.name,
+            slug: schema.categories.slug,
+            description: schema.categories.description,
+            color: schema.categories.color,
+            postCount: sql`count(${schema.posts.id})`
+        })
+        .from(schema.categories)
+        .leftJoin(schema.posts, sql`${schema.categories.id} = ${schema.posts.categoryId} AND ${schema.posts.published} = 1`)
+        .groupBy(schema.categories.id)
+        .all();
+
+    // Get latest posts for footer
+    const latestPosts = db
+        .select({
+            title: schema.posts.title,
+            slug: schema.posts.slug,
+            featuredImage: schema.posts.featuredImage,
+            publishedAt: schema.posts.publishedAt
+        })
+        .from(schema.posts)
+        .where(sql`${schema.posts.published} = 1`)
+        .orderBy(sql`${schema.posts.publishedAt} DESC`)
+        .limit(3)
+        .all();
+
+    return {
+        commonCategories: categories.filter(c => c.postCount > 0),
+        latestPosts: latestPosts
+    };
+}
