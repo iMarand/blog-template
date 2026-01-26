@@ -1,7 +1,5 @@
 <script>
 	import { Facebook, Twitter, Youtube, Instagram, ChevronRight, ShieldCheck } from 'lucide-svelte';
-	import BlogHeader from '$lib/components/BlogHeader.svelte';
-	import BlogFooter from '$lib/components/BlogFooter.svelte';
 
 	let { data } = $props();
 	let isDarkMode = $state(false);
@@ -19,7 +17,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100">
-	<BlogHeader bind:isDarkMode />
+	<!-- <BlogHeader bind:isDarkMode /> -->
 
 	<main class="container mx-auto px-4 py-12 lg:px-6">
 		<!-- Breadcrumbs -->
@@ -168,5 +166,5 @@
 		</div>
 	</main>
 
-	<BlogFooter categories={data.commonCategories} latestPosts={data.latestPosts} />
+	<!-- <BlogFooter categories={data.commonCategories} latestPosts={data.latestPosts} /> -->
 </div>
