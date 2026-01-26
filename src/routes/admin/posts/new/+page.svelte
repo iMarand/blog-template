@@ -220,6 +220,22 @@
 						Publish
 					</h3>
 					<div class="space-y-3">
+						<div class="flex items-center gap-2 px-1 py-1">
+							<input
+								type="checkbox"
+								id="inSitemap"
+								name="inSitemap"
+								value="true"
+								checked
+								class="h-4 w-4 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-600"
+							/>
+							<label
+								for="inSitemap"
+								class="cursor-pointer text-xs font-bold text-slate-700 uppercase"
+							>
+								Include in Sitemap
+							</label>
+						</div>
 						<button
 							type="submit"
 							name="action"

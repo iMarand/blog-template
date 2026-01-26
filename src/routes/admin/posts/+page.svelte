@@ -1,8 +1,8 @@
 <script>
 	import { enhance } from '$app/forms';
-	import { Plus, Search, Edit, Trash2, Eye, PenTool } from 'lucide-svelte';
+	import { Plus, Search, Edit, Trash2, Eye, PenTool, Mail } from 'lucide-svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 	let searchQuery = $state('');
 
 	let filteredPosts = $derived(
@@ -15,6 +15,14 @@
 </svelte:head>
 
 <div class="space-y-6">
+	{#if form?.newsletterSuccess}
+		<div
+			class="border-l-4 border-green-500 bg-green-50 p-4 text-sm font-bold text-green-700 shadow-sm"
+		>
+			{form.message}
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div
 		class="flex flex-col gap-4 border-l-4 border-slate-900 bg-white px-6 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
@@ -154,6 +162,27 @@
 											>
 												<Eye class="h-4 w-4" />
 											</a>
+											{#if data.user?.role === 'admin'}
+												<form
+													action="?/sendNewsletter"
+													method="POST"
+													use:enhance={() => {
+														if (!confirm('Send this article to all subscribers?')) return false;
+														return async ({ update }) => {
+															await update();
+														};
+													}}
+												>
+													<input type="hidden" name="postId" value={post.id} />
+													<button
+														type="submit"
+														class="p-1.5 text-slate-400 transition-colors hover:text-blue-600"
+														title="Send Newsletter"
+													>
+														<Mail class="h-4 w-4" />
+													</button>
+												</form>
+											{/if}
 										{/if}
 										<a
 											href="/admin/posts/{post.id}"

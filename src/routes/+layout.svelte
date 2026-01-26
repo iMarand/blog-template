@@ -2,8 +2,10 @@
 	import '../app.css';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { page } from '$app/stores';
 
 	let { data, children } = $props();
+	const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
 </script>
 
 <svelte:head>
@@ -14,14 +16,22 @@
 	<script src="https://cdn.tailwindcss.com"></script>
 </svelte:head>
 
-<Header categories={data.commonCategories} />
+{#if !isAdmin}
+	<Header categories={data.commonCategories} blogName={data.blogName} />
+{/if}
 
 <div class="min-h-screen bg-white font-[Roboto] text-[#222]">
 	<main>
 		{@render children()}
 	</main>
 
-	<Footer categories={data.commonCategories} latestNews={data.latestPosts} />
+	{#if !isAdmin}
+		<Footer
+			categories={data.commonCategories}
+			latestNews={data.latestPosts}
+			blogName={data.blogName}
+		/>
+	{/if}
 </div>
 
 <style>

@@ -56,6 +56,19 @@ export const posts = sqliteTable('posts', {
     featuredImage: text('featured_image'),
     published: integer('published', { mode: 'boolean' }).default(false),
     publishedAt: integer('published_at', { mode: 'timestamp' }),
+    inSitemap: integer('in_sitemap', { mode: 'boolean' }).default(true),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
+});
+
+// Pages table for static content
+export const pages = sqliteTable('pages', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    title: text('title').notNull(),
+    slug: text('slug').notNull().unique(),
+    content: text('content').notNull(),
+    published: integer('published', { mode: 'boolean' }).default(false),
+    inSitemap: integer('in_sitemap', { mode: 'boolean' }).default(true),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
 });
@@ -76,6 +89,20 @@ export const postTags = sqliteTable('post_tags', {
         .references(() => posts.id, { onDelete: 'cascade' })
         .notNull(),
     tag: text('tag').notNull()
+});
+
+// Settings table for global configuration
+export const settings = sqliteTable('settings', {
+    key: text('key').primaryKey(),
+    value: text('value').notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
+});
+
+// Subscribers table
+export const subscribers = sqliteTable('subscribers', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    email: text('email').notNull().unique(),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
 });
 
 // Keep admins export for backward compatibility during migration

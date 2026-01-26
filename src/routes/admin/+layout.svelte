@@ -21,6 +21,8 @@
 		{ href: '/admin', icon: LayoutDashboard, label: 'DASHBOARD', exact: true },
 		{ href: '/admin/posts', icon: FileText, label: 'ALL POSTS' },
 		{ href: '/admin/posts/new', icon: PenTool, label: 'NEW POST' },
+		{ href: '/admin/pages', icon: FileText, label: 'PAGES', adminOnly: true },
+		{ href: '/admin/subscribers', icon: Users, label: 'SUBSCRIBERS', adminOnly: true },
 		{ href: '/admin/authors', icon: Users, label: 'AUTHORS', adminOnly: true },
 		{ href: '/admin/profile', icon: Users, label: 'MY PROFILE' }
 	];

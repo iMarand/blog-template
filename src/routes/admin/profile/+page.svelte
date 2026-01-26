@@ -1,6 +1,6 @@
 <script>
 	import { enhance } from '$app/forms';
-	import { User, Lock, Save, AlertCircle } from 'lucide-svelte';
+	import { User, Lock, Save, AlertCircle, Settings } from 'lucide-svelte';
 
 	let { data, form } = $props();
 	let loading = $state(false);
@@ -48,6 +48,12 @@
 							class="border-l-4 border-green-500 bg-green-50 p-3 text-xs font-bold text-green-700"
 						>
 							Profile updated successfully!
+						</div>
+					{/if}
+
+					{#if form?.profileError}
+						<div class="border-l-4 border-red-500 bg-red-50 p-3 text-xs font-bold text-red-700">
+							{form.profileError}
 						</div>
 					{/if}
 
@@ -106,6 +112,79 @@
 					</div>
 				</form>
 			</div>
+
+			<!-- Site Settings (Admin only) -->
+			{#if data.user.role === 'admin'}
+				<div class="relative overflow-hidden border border-slate-200 bg-white p-6 shadow-sm">
+					<div class="absolute top-0 right-0 p-4 opacity-5">
+						<Settings class="h-24 w-24 text-slate-900" />
+					</div>
+					<h2
+						class="mb-6 flex items-center gap-2 border-b border-slate-100 pb-2 text-sm font-bold tracking-wider text-slate-900 uppercase"
+					>
+						<Settings class="h-4 w-4 text-blue-600" />
+						Site Settings
+					</h2>
+
+					<form
+						method="POST"
+						action="?/updateSettings"
+						class="space-y-4"
+						use:enhance={() => {
+							loading = true;
+							return async ({ update }) => {
+								loading = false;
+								await update();
+							};
+						}}
+					>
+						{#if form?.settingsSuccess}
+							<div
+								class="border-l-4 border-green-500 bg-green-50 p-3 text-xs font-bold text-green-700"
+							>
+								Settings updated successfully!
+							</div>
+						{/if}
+
+						{#if form?.settingsError}
+							<div class="border-l-4 border-red-500 bg-red-50 p-3 text-xs font-bold text-red-700">
+								{form.settingsError}
+							</div>
+						{/if}
+
+						<div>
+							<label class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+								>Blog Name</label
+							>
+							<input
+								type="text"
+								name="blogName"
+								value={data.settings.blog_name || ''}
+								required
+								class="w-full border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+							/>
+							<p class="mt-1 text-[10px] text-slate-400">
+								This name will be used in the header and footer of the public site.
+							</p>
+						</div>
+
+						<div class="pt-2">
+							<button
+								type="submit"
+								disabled={loading}
+								class="flex items-center gap-2 bg-blue-600 px-4 py-2 text-xs font-bold tracking-wider text-white uppercase transition-colors hover:bg-blue-700 disabled:opacity-50"
+							>
+								{#if loading}
+									<span
+										class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"
+									></span>
+								{/if}
+								Update Settings
+							</button>
+						</div>
+					</form>
+				</div>
+			{/if}
 		</div>
 
 		<!-- Change Password -->

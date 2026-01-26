@@ -1,7 +1,7 @@
 <script>
 	import { Menu, X, Search } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
-	let { categories = [] } = $props();
+	let { categories = [], blogName = 'NewsWeek' } = $props();
 	let menuOpen = $state(false);
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
@@ -62,7 +62,8 @@
 					<h1
 						class="m-0 inline-flex items-baseline font-['Playfair_Display'] text-[2.2rem] leading-none font-black text-[#e31e24] italic md:text-[3.2rem]"
 					>
-						NewsWeek <span
+						{blogName}
+						<span
 							class="ml-1 font-[Roboto] text-[0.7rem] font-black tracking-tighter text-[#222] uppercase italic not-italic md:text-[0.9rem]"
 							>PRO</span
 						>
@@ -213,7 +214,7 @@
 		>
 			<div class="mb-10 flex items-center justify-between">
 				<h2 class="font-['Playfair_Display'] text-2xl font-black text-[#e31e24] italic">
-					NewsWeek <span class="text-xs font-black text-black not-italic">PRO</span>
+					{blogName} <span class="text-xs font-black text-black not-italic">PRO</span>
 				</h2>
 				<button
 					onclick={() => (menuOpen = false)}

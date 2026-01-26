@@ -113,6 +113,24 @@ function createTables() {
         );
     `);
 
+    // Create settings table
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at INTEGER DEFAULT (unixepoch())
+        );
+    `);
+
+    // Create subscribers table
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            created_at INTEGER DEFAULT (unixepoch())
+        );
+    `);
+
     // Migration: Add missing columns to existing tables
     try {
         const postColumns = sqlite.prepare("PRAGMA table_info(posts)").all();
@@ -127,9 +145,29 @@ function createTables() {
             sqlite.exec('ALTER TABLE posts ADD COLUMN author_id INTEGER REFERENCES users(id)');
             console.log('✅ Added author_id column to posts table');
         }
+
+        const hasInSitemap = postColumns.some(col => col.name === 'in_sitemap');
+        if (!hasInSitemap) {
+            sqlite.exec('ALTER TABLE posts ADD COLUMN in_sitemap INTEGER DEFAULT 1');
+            console.log('✅ Added in_sitemap column to posts table');
+        }
     } catch (e) {
         console.log('Migration check:', e.message);
     }
+
+    // Create pages table
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS pages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            content TEXT NOT NULL,
+            published INTEGER DEFAULT 0,
+            in_sitemap INTEGER DEFAULT 1,
+            created_at INTEGER DEFAULT (unixepoch()),
+            updated_at INTEGER DEFAULT (unixepoch())
+        );
+    `);
 
     // Migrate old admins table data if exists
     try {
@@ -148,6 +186,17 @@ function createTables() {
         }
     } catch (e) {
         // Old admins table doesn't exist, that's fine
+    }
+
+    // Seed default settings
+    try {
+        const blogNameCheck = sqlite.prepare("SELECT * FROM settings WHERE key = 'blog_name'").get();
+        if (!blogNameCheck) {
+            sqlite.prepare("INSERT INTO settings (key, value) VALUES ('blog_name', 'NewsWeek')").run();
+            console.log('✅ Default blog name set to NewsWeek');
+        }
+    } catch (e) {
+        console.error('Error seeding default settings:', e.message);
     }
 
     console.log('✅ Database tables created/verified');

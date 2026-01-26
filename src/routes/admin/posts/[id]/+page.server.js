@@ -163,6 +163,7 @@ export const actions = {
 
         let published = existingPost.published;
         let publishedAt = existingPost.publishedAt;
+        const inSitemap = data.get('inSitemap') === 'true';
 
         if (action === 'publish') {
             published = true;
@@ -182,6 +183,7 @@ export const actions = {
                 featuredImage: featuredImage || null,
                 published,
                 publishedAt,
+                inSitemap,
                 updatedAt: new Date()
             })
             .where(eq(schema.posts.id, postId))

@@ -86,6 +86,7 @@ export const actions = {
         }
 
         const isPublish = action === 'publish';
+        const inSitemap = data.get('inSitemap') === 'true';
 
         // Create the post metadata in DB (content is stored in FS)
         db.insert(schema.posts).values({
@@ -96,7 +97,8 @@ export const actions = {
             excerpt: excerpt || null,
             featuredImage: featuredImage || null,
             published: isPublish,
-            publishedAt: isPublish ? new Date() : null
+            publishedAt: isPublish ? new Date() : null,
+            inSitemap
         }).run();
 
         throw redirect(303, '/admin/posts');

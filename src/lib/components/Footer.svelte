@@ -1,5 +1,36 @@
 <script>
-	let { categories = [], latestNews = [] } = $props();
+	let { categories = [], latestNews = [], blogName = 'NewsWeek' } = $props();
+	let email = $state('');
+	let status = $state(''); // 'loading', 'success', 'error'
+	let message = $state('');
+
+	async function subscribe(e) {
+		e.preventDefault();
+		status = 'loading';
+		message = '';
+
+		try {
+			const res = await fetch('/api/subscribe', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email })
+			});
+
+			const result = await res.json();
+
+			if (res.ok) {
+				status = 'success';
+				message = 'Thank you for subscribing!';
+				email = '';
+			} else {
+				status = 'error';
+				message = result.error || 'Something went wrong. Please try again.';
+			}
+		} catch (e) {
+			status = 'error';
+			message = 'Could not connect to the server.';
+		}
+	}
 </script>
 
 <footer class="bg-[#ededed] pt-16 font-[Roboto] text-[#222]">
@@ -8,7 +39,7 @@
 		<div class="mb-8 text-center md:hidden">
 			<a href="/" class="no-underline">
 				<h2 class="m-0 font-['Playfair_Display'] text-4xl font-black text-[#222] italic">
-					NewsWeek <span class="align-top font-[Roboto] text-xs not-italic">PRO</span>
+					{blogName} <span class="align-top font-[Roboto] text-xs not-italic">PRO</span>
 				</h2>
 			</a>
 		</div>
@@ -19,7 +50,7 @@
 			<h2
 				class="m-0 hidden font-['Playfair_Display'] text-4xl font-black text-[#222] italic md:block"
 			>
-				NewsWeek <span class="align-top font-[Roboto] text-xs not-italic">PRO</span>
+				{blogName} <span class="align-top font-[Roboto] text-xs not-italic">PRO</span>
 			</h2>
 			<nav class="mt-4 flex flex-wrap justify-center gap-4 md:mt-0 md:gap-5">
 				{#each categories as cat}
@@ -39,8 +70,8 @@
 			<div>
 				<h3 class="m-0 mb-6 text-2xl font-black">About us</h3>
 				<p class="mb-6 text-sm leading-relaxed text-gray-700">
-					NewsWeek PRO is your ultimate source for the latest in technology, lifestyle, and global
-					trends. We bring you curated stories that matter.
+					{blogName} PRO is your ultimate source for the latest in technology, lifestyle, and global trends.
+					We bring you curated stories that matter.
 				</p>
 				<div class="flex gap-2">
 					<a
@@ -125,19 +156,31 @@
 			<!-- Subscribe -->
 			<div>
 				<h3 class="m-0 mb-6 text-2xl font-black">Subscribe</h3>
-				<form class="space-y-3" onsubmit={(e) => e.preventDefault()}>
+				<form class="space-y-3" onsubmit={subscribe}>
 					<input
 						type="email"
+						bind:value={email}
 						placeholder="Email address"
 						required
-						class="w-full border border-gray-300 p-4 text-sm focus:border-[#e31e24] focus:outline-none"
+						disabled={status === 'loading'}
+						class="w-full border border-gray-300 p-4 text-sm focus:border-[#e31e24] focus:outline-none disabled:opacity-50"
 					/>
 					<button
 						type="submit"
-						class="flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-black p-4 font-black text-white transition-colors hover:bg-[#e31e24]"
+						disabled={status === 'loading'}
+						class="flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-black p-4 font-black text-white transition-colors hover:bg-[#e31e24] disabled:opacity-50"
 					>
-						I WANT IN <span>→</span>
+						{status === 'loading' ? 'SUBSCRIBING...' : 'I WANT IN'} <span>→</span>
 					</button>
+					{#if message}
+						<p
+							class="text-center text-xs font-bold {status === 'success'
+								? 'text-green-600'
+								: 'text-red-600'}"
+						>
+							{message}
+						</p>
+					{/if}
 					<label class="flex cursor-pointer items-start gap-2 text-[10px] text-gray-500">
 						<input type="checkbox" required class="mt-0.5" />
 						<span
@@ -154,7 +197,8 @@
 
 	<div class="border-t border-gray-300 px-5 py-8 text-center text-xs text-gray-500">
 		<p>
-			© {new Date().getFullYear()} NewsWeek PRO. All Rights Reserved. Designed for premium experience.
+			© {new Date().getFullYear()}
+			{blogName} PRO. All Rights Reserved. Designed for premium experience.
 		</p>
 	</div>
 </footer>

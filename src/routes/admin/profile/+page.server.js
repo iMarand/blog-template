@@ -4,8 +4,16 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
 export const load = async ({ locals }) => {
+    // Load site settings
+    const settingsList = db.select().from(schema.settings).all();
+    const settings = settingsList.reduce((acc, curr) => {
+        acc[curr.key] = curr.value;
+        return acc;
+    }, {});
+
     return {
-        user: locals.user
+        user: locals.user,
+        settings
     };
 };
 
@@ -16,11 +24,11 @@ export const actions = {
         const email = data.get('email')?.toString().trim();
 
         if (!displayName) {
-            return fail(400, { error: 'Display name is required', displayName, email });
+            return fail(400, { profileError: 'Display name is required', displayName, email });
         }
 
         if (!email) {
-            return fail(400, { error: 'Email is required', displayName, email });
+            return fail(400, { profileError: 'Email is required', displayName, email });
         }
 
         try {
@@ -36,7 +44,36 @@ export const actions = {
             return { profileSuccess: true };
         } catch (e) {
             console.error('Profile update error:', e);
-            return fail(500, { error: 'Failed to update profile' });
+            return fail(500, { profileError: 'Failed to update profile' });
+        }
+    },
+
+    updateSettings: async ({ request, locals }) => {
+        // Only admin can update settings
+        if (locals.user.role !== 'admin') {
+            return fail(403, { settingsError: 'Unauthorized' });
+        }
+
+        const data = await request.formData();
+        const blogName = data.get('blogName')?.toString().trim();
+
+        if (!blogName) {
+            return fail(400, { settingsError: 'Blog name is required' });
+        }
+
+        try {
+            db.insert(schema.settings)
+                .values({ key: 'blog_name', value: blogName, updatedAt: new Date() })
+                .onConflictDoUpdate({
+                    target: schema.settings.key,
+                    set: { value: blogName, updatedAt: new Date() }
+                })
+                .run();
+
+            return { settingsSuccess: true };
+        } catch (e) {
+            console.error('Settings update error:', e);
+            return fail(500, { settingsError: 'Failed to update settings' });
         }
     },
 

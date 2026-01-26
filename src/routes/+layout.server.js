@@ -31,8 +31,13 @@ export async function load() {
         .limit(3)
         .all();
 
+    // Get blog name from settings
+    const blogNameSetting = db.select().from(schema.settings).where(sql`${schema.settings.key} = 'blog_name'`).get();
+    const blogName = blogNameSetting?.value || 'NewsWeek';
+
     return {
         commonCategories: categories.filter(c => c.postCount > 0),
-        latestPosts: latestPosts
+        latestPosts: latestPosts,
+        blogName
     };
 }
