@@ -23,6 +23,7 @@
 		{ href: '/admin/posts/new', icon: PenTool, label: 'NEW POST' },
 		{ href: '/admin/pages', icon: FileText, label: 'PAGES', adminOnly: true },
 		{ href: '/admin/subscribers', icon: Users, label: 'SUBSCRIBERS', adminOnly: true },
+		{ href: '/admin/comments', icon: PenTool, label: 'COMMENTS' },
 		{ href: '/admin/authors', icon: Users, label: 'AUTHORS', adminOnly: true },
 		{ href: '/admin/profile', icon: Users, label: 'MY PROFILE' }
 	];

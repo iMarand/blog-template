@@ -1,9 +1,51 @@
 <script>
 	import { page } from '$app/state';
+	import { enhance } from '$app/forms';
 	let { data } = $props();
+
+	let commentName = $state('');
+	let commentEmail = $state('');
+	let commentContent = $state('');
+	let isSubmitting = $state(false);
+	let commentStatus = $state(null);
 
 	const post = $derived(data.post);
 	const relatedPosts = $derived(data.relatedPosts || []);
+	const comments = $derived(data.comments || []);
+
+	async function submitComment(e) {
+		e.preventDefault();
+		isSubmitting = true;
+		commentStatus = null;
+
+		try {
+			const res = await fetch('/api/comments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					postId: post.id,
+					authorName: commentName,
+					authorEmail: commentEmail,
+					content: commentContent
+				})
+			});
+			const result = await res.json();
+			if (result.success) {
+				commentStatus = { type: 'success', message: 'Comment posted successfully!' };
+				commentName = '';
+				commentEmail = '';
+				commentContent = '';
+				// Reload data to show new comment
+				window.location.reload();
+			} else {
+				commentStatus = { type: 'error', message: result.error || 'Failed to post comment.' };
+			}
+		} catch (e) {
+			commentStatus = { type: 'error', message: 'An error occurred. Please try again.' };
+		} finally {
+			isSubmitting = false;
+		}
+	}
 
 	const formattedDate = $derived(
 		post.publishedAt
@@ -144,6 +186,107 @@
 					<span class="cursor-pointer hover:text-[#e31e24]">📸</span>
 					<span class="cursor-pointer hover:text-[#e31e24]">𝕏</span>
 					<span class="cursor-pointer hover:text-[#e31e24]">▶</span>
+				</div>
+			</div>
+
+			<!-- Comments Section -->
+			<div class="mt-20 border-t border-gray-100 pt-16">
+				<div class="mb-10 flex items-center justify-between border-b border-black pb-4">
+					<h3 class="text-2xl font-black tracking-tighter uppercase">
+						Comments ({comments.length})
+					</h3>
+				</div>
+
+				{#if comments.length === 0}
+					<p class="py-10 text-center text-gray-400 italic">
+						No comments yet. Be the first to share your thoughts!
+					</p>
+				{:else}
+					<div class="space-y-10">
+						{#each comments as comment}
+							<div class="flex gap-6">
+								<div
+									class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-xl font-bold text-[#e31e24]"
+								>
+									{comment.authorName.charAt(0).toUpperCase()}
+								</div>
+								<div class="flex-1">
+									<div class="mb-2 flex items-center justify-between">
+										<h4 class="text-base font-black uppercase">{comment.authorName}</h4>
+										<span class="text-[10px] font-bold text-gray-400 uppercase">
+											{new Date(comment.createdAt).toLocaleDateString('en-US', {
+												month: 'long',
+												day: 'numeric',
+												year: 'numeric'
+											})}
+										</span>
+									</div>
+									<p class="leading-relaxed text-gray-700">{comment.content}</p>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Post Comment Form -->
+				<div class="mt-20 bg-gray-50 p-8 sm:p-12">
+					<h3 class="mb-8 text-xl font-black tracking-tighter uppercase">Leave a Reply</h3>
+
+					{#if commentStatus}
+						<div
+							class="mb-6 rounded-sm p-4 text-sm font-bold {commentStatus.type === 'success'
+								? 'border-l-4 border-green-500 bg-green-50 text-green-700'
+								: 'border-l-4 border-red-500 bg-red-50 text-red-700'}"
+						>
+							{commentStatus.message}
+						</div>
+					{/if}
+
+					<form onsubmit={submitComment} class="space-y-6">
+						<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+							<div class="space-y-2">
+								<label class="text-[10px] font-black text-gray-400 uppercase">Your Name *</label>
+								<input
+									type="text"
+									bind:value={commentName}
+									required
+									placeholder="Name"
+									class="w-full border border-gray-200 bg-white p-4 text-sm focus:border-[#e31e24] focus:outline-none"
+								/>
+							</div>
+							<div class="space-y-2">
+								<label class="text-[10px] font-black text-gray-400 uppercase">Your Email</label>
+								<input
+									type="email"
+									bind:value={commentEmail}
+									placeholder="Email"
+									class="w-full border border-gray-200 bg-white p-4 text-sm focus:border-[#e31e24] focus:outline-none"
+								/>
+							</div>
+						</div>
+						<div class="space-y-2">
+							<label class="text-[10px] font-black text-gray-400 uppercase">Comment *</label>
+							<textarea
+								bind:value={commentContent}
+								required
+								rows="6"
+								placeholder="Write your thoughts..."
+								class="w-full resize-none border border-gray-200 bg-white p-4 text-sm focus:border-[#e31e24] focus:outline-none"
+							></textarea>
+						</div>
+						<button
+							type="submit"
+							disabled={isSubmitting}
+							class="flex min-w-[200px] items-center justify-center gap-2 rounded-sm bg-[#e31e24] px-10 py-5 text-sm font-black text-white uppercase shadow-lg transition-colors hover:bg-black disabled:bg-gray-400"
+						>
+							{#if isSubmitting}
+								<span
+									class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+								></span>
+							{/if}
+							Post Comment
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>

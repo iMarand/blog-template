@@ -16,6 +16,7 @@ if (!existsSync(dbDir)) {
 // Create SQLite connection
 const sqlite = new Database(dbPath);
 sqlite.pragma('journal_mode = WAL');
+sqlite.pragma('foreign_keys = ON');
 
 // Create tables if they don't exist
 function createTables() {
@@ -83,8 +84,11 @@ function createTables() {
             author_id INTEGER,
             excerpt TEXT,
             featured_image TEXT,
+            is_featured INTEGER DEFAULT 0,
+            is_exclusive INTEGER DEFAULT 0,
             published INTEGER DEFAULT 0,
             published_at INTEGER,
+            in_sitemap INTEGER DEFAULT 1,
             created_at INTEGER DEFAULT (unixepoch()),
             updated_at INTEGER DEFAULT (unixepoch()),
             FOREIGN KEY (category_id) REFERENCES categories(id),
@@ -100,6 +104,17 @@ function createTables() {
             alt TEXT,
             path TEXT NOT NULL,
             uploaded_at INTEGER DEFAULT (unixepoch())
+        );
+    `);
+
+    // Create post_categories table (Many-to-Many)
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS post_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            category_id INTEGER NOT NULL,
+            FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+            FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
         );
     `);
 
@@ -128,6 +143,32 @@ function createTables() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT NOT NULL UNIQUE,
             created_at INTEGER DEFAULT (unixepoch())
+        );
+    `);
+
+    // Create page_views table
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS page_views (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER,
+            slug TEXT NOT NULL UNIQUE,
+            views INTEGER DEFAULT 0,
+            updated_at INTEGER DEFAULT (unixepoch()),
+            FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+        );
+    `);
+
+    // Create comments table
+    sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            author_name TEXT NOT NULL,
+            author_email TEXT,
+            content TEXT NOT NULL,
+            approved INTEGER DEFAULT 1,
+            created_at INTEGER DEFAULT (unixepoch()),
+            FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
         );
     `);
 

@@ -6,12 +6,13 @@
 
 	const categories = $derived((data.categories || []).map((c) => c.name));
 	const categoryList = $derived(data.categories || []);
+	const popularPosts = $derived(data.popularPosts || []);
 
 	const carouselPosts = $derived(
 		(data.carouselPosts || []).map((p) => ({
 			...p,
 			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', {
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
 						day: 'numeric',
 						year: 'numeric'
@@ -25,7 +26,7 @@
 			...p,
 			category: p.categoryName || 'GENERAL',
 			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', {
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
 						day: 'numeric',
 						year: 'numeric'
@@ -38,12 +39,12 @@
 
 	const popularVisual = $derived(data.popularVisual || []);
 
-	const popularListPosts = $derived(
+	const popularList = $derived(
 		(data.popularList || []).map((p) => ({
 			...p,
 			category: p.categoryName || 'GENERAL',
 			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', {
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
 						day: 'numeric',
 						year: 'numeric'
@@ -79,7 +80,7 @@
 			...p,
 			author: 'Dan Bush',
 			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', {
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
 						day: 'numeric',
 						year: 'numeric'
@@ -96,7 +97,7 @@
 			title: p.title,
 			slug: p.slug,
 			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', {
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
 						day: 'numeric',
 						year: 'numeric'
@@ -207,9 +208,7 @@
 					>
 						{heroFeatured.title}
 					</h2>
-					<p
-						class="line-clamp-2 hidden text-sm leading-relaxed opacity-90 sm:block sm:text-base md:line-clamp-none"
-					>
+					<p class="hidden text-sm leading-relaxed opacity-90 sm:line-clamp-2 sm:text-base">
 						{heroFeatured.excerpt || ''}
 					</p>
 				</div>
@@ -293,7 +292,7 @@
 		<!-- List Sidebar -->
 		<div class="order-4 h-fit bg-gray-50 p-6 shadow-sm lg:order-4 lg:p-4">
 			<div class="space-y-5">
-				{#each popularListPosts as item}
+				{#each popularList as item}
 					<div class="border-b border-gray-200 pb-3 last:border-0">
 						<div class="mb-1 flex items-center gap-2">
 							<span class="text-[9px] font-black text-[#e31e24] uppercase">{item.category}</span>
@@ -529,15 +528,15 @@
 				<!-- Most Read List -->
 				<div>
 					<div class="mb-8 border-b-4 border-black pb-2">
-						<h3 class="m-0 text-xl font-black tracking-tighter uppercase">Don't Miss</h3>
+						<h3 class="m-0 text-xl font-black tracking-tighter uppercase">Popular Posts</h3>
 					</div>
 					<div class="space-y-8">
-						{#each recentSidebar as item}
+						{#each popularPosts.slice(0, 5) as item}
 							<div class="group flex gap-4">
 								<div class="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-gray-200"></div>
 								<div class="flex-1">
 									<span class="mb-1 block text-[10px] font-black text-[#e31e24] uppercase"
-										>{item.cat}</span
+										>{item.categoryName || 'GENERAL'}</span
 									>
 									<a href="/blog/{item.slug}" class="text-black no-underline"
 										><h5
@@ -548,7 +547,11 @@
 									>
 									<span
 										class="mt-2 block text-[9px] font-bold tracking-wider text-gray-400 uppercase"
-										>{item.date}</span
+										>{new Date(item.publishedAt * 1000).toLocaleDateString('en-US', {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric'
+										})}</span
 									>
 								</div>
 							</div>

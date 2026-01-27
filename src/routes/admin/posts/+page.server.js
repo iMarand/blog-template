@@ -14,7 +14,8 @@ export function load({ locals }) {
             published: schema.posts.published,
             createdAt: schema.posts.createdAt,
             categoryId: schema.posts.categoryId,
-            authorId: schema.posts.authorId
+            authorId: schema.posts.authorId,
+            isFeatured: schema.posts.isFeatured
         })
         .from(schema.posts)
         .orderBy(desc(schema.posts.createdAt));
@@ -29,7 +30,8 @@ export function load({ locals }) {
                 published: schema.posts.published,
                 createdAt: schema.posts.createdAt,
                 categoryId: schema.posts.categoryId,
-                authorId: schema.posts.authorId
+                authorId: schema.posts.authorId,
+                isFeatured: schema.posts.isFeatured
             })
             .from(schema.posts)
             .where(eq(schema.posts.authorId, user.id))

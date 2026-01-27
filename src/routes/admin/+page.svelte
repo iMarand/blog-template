@@ -73,76 +73,100 @@
 				</div>
 				<div class="mt-4 text-xs font-bold text-slate-400">Content categories</div>
 			</div>
+
+			<div class="group relative overflow-hidden border border-slate-200 bg-white p-6">
+				<div
+					class="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20"
+				>
+					<Eye class="h-16 w-16 text-red-600" />
+				</div>
+				<div>
+					<p class="mb-2 text-xs font-bold tracking-wider text-slate-500 uppercase">Total Views</p>
+					<p class="text-4xl font-extrabold text-slate-900">{data.stats.totalViews}</p>
+				</div>
+				<div class="mt-4 text-xs font-bold text-slate-400">Total site traffic</div>
+			</div>
 		{/if}
 	</div>
 
-	<!-- Recent Posts -->
-	<div>
-		<div
-			class="mb-4 flex items-center justify-between border-l-4 border-slate-900 bg-white px-4 py-2"
-		>
-			<h2 class="text-sm font-bold tracking-wider text-slate-900 uppercase">Recent Posts</h2>
-			<a
-				href="/admin/posts"
-				class="text-xs font-bold tracking-wider text-blue-600 uppercase hover:text-blue-800"
+	<!-- Stats & Activity Row -->
+	<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+		<!-- Top Posts by Views -->
+		<div>
+			<div
+				class="mb-4 flex items-center justify-between border-l-4 border-slate-900 bg-white px-4 py-2"
 			>
-				View all
-			</a>
+				<h2 class="text-sm font-bold tracking-wider text-slate-900 uppercase">
+					Top Posts by Views
+				</h2>
+			</div>
+			<div class="border border-slate-200 bg-white">
+				{#if data.topPosts.length === 0}
+					<div class="p-12 text-center text-slate-400">
+						<p class="text-xs font-bold tracking-widest uppercase">No traffic data yet</p>
+					</div>
+				{:else}
+					<div class="divide-y divide-slate-100">
+						{#each data.topPosts as post}
+							<div
+								class="flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50"
+							>
+								<div class="min-w-0 flex-1">
+									<h3 class="truncate font-bold text-slate-900">{post.title}</h3>
+									<p class="text-[10px] text-slate-400 uppercase">/blog/{post.slug}</p>
+								</div>
+								<div class="ml-4 text-right">
+									<div class="text-lg font-black text-slate-900">{post.views}</div>
+									<div class="text-[9px] font-bold text-slate-400 uppercase">Views</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
 
-		<div class="border border-slate-200 bg-white">
-			{#if data.recentPosts.length === 0}
-				<div class="p-12 text-center">
-					<FileText class="mx-auto mb-4 h-12 w-12 text-slate-300" />
-					<h3 class="mb-2 text-lg font-bold text-slate-900">No posts yet</h3>
-					<p class="mb-4 text-sm text-slate-500">Get started by creating your first post</p>
+		<!-- Recent Posts -->
+		<div>
+			<div
+				class="mb-4 flex items-center justify-between border-l-4 border-slate-900 bg-white px-4 py-2"
+			>
+				<h2 class="text-sm font-bold tracking-wider text-slate-900 uppercase">Recent Activity</h2>
+				<a
+					href="/admin/posts"
+					class="text-xs font-bold tracking-wider text-blue-600 uppercase hover:text-blue-800"
+				>
+					View all
+				</a>
+			</div>
+			<div class="border border-slate-200 bg-white">
+				{#each data.recentPosts as post}
 					<a
-						href="/admin/posts/new"
-						class="inline-flex items-center gap-2 bg-blue-600 px-4 py-2 text-xs font-bold tracking-wider text-white uppercase transition-colors hover:bg-blue-700"
+						href="/admin/posts/{post.id}"
+						class="group block px-6 py-4 transition-colors hover:bg-slate-50"
 					>
-						<PenTool class="h-4 w-4" />
-						Create Post
-					</a>
-				</div>
-			{:else}
-				<div class="divide-y divide-slate-100">
-					{#each data.recentPosts as post}
-						<a
-							href="/admin/posts/{post.id}"
-							class="group block px-6 py-4 transition-colors hover:bg-slate-50"
-						>
-							<div class="flex items-center justify-between">
-								<div class="min-w-0 flex-1">
-									<h3
-										class="truncate font-bold text-slate-900 transition-colors group-hover:text-blue-600"
-									>
-										{post.title}
-									</h3>
-									<div class="mt-1 flex items-center gap-3">
-										<span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-											{new Date(post.createdAt).toLocaleDateString()}
-										</span>
-										{#if post.categoryName}
-											<span
-												class="bg-slate-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-slate-600 uppercase"
-											>
-												{post.categoryName}
-											</span>
-										{/if}
-									</div>
-								</div>
-								<span
-									class="ml-4 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase {post.published
-										? 'bg-green-100 text-green-700'
-										: 'bg-amber-100 text-amber-700'}"
+						<div class="flex items-center justify-between">
+							<div class="min-w-0 flex-1">
+								<h3
+									class="truncate font-bold text-slate-900 transition-colors group-hover:text-blue-600"
 								>
-									{post.published ? 'Published' : 'Draft'}
-								</span>
+									{post.title}
+								</h3>
+								<div class="mt-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+									{new Date(post.createdAt).toLocaleDateString()}
+								</div>
 							</div>
-						</a>
-					{/each}
-				</div>
-			{/if}
+							<span
+								class="ml-4 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase {post.published
+									? 'bg-green-100 text-green-700'
+									: 'bg-amber-100 text-amber-700'}"
+							>
+								{post.published ? 'Published' : 'Draft'}
+							</span>
+						</div>
+					</a>
+				{/each}
+			</div>
 		</div>
 	</div>
 </div>

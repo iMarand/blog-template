@@ -13,7 +13,7 @@ export async function load() {
             postCount: sql`count(${schema.posts.id})`
         })
         .from(schema.categories)
-        .innerJoin(schema.posts, and(eq(schema.categories.id, schema.posts.categoryId), eq(schema.posts.published, true)))
+        .innerJoin(schema.posts, and(eq(schema.categories.id, schema.posts.categoryId), eq(schema.posts.published, 1)))
         .groupBy(schema.categories.id)
         .orderBy(schema.categories.name)
         .all();
@@ -27,7 +27,7 @@ export async function load() {
             publishedAt: schema.posts.publishedAt
         })
         .from(schema.posts)
-        .where(sql`${schema.posts.published} = 1`)
+        .where(eq(schema.posts.published, 1))
         .orderBy(sql`${schema.posts.publishedAt} DESC`)
         .limit(3)
         .all();

@@ -17,8 +17,8 @@ function extractVideoUrl(content) {
 }
 
 export async function load() {
-    // 1. Common Data
-    const allPublished = db
+    // 1. Fetch Popular Posts
+    const popularPostsRaw = db
         .select({
             id: schema.posts.id,
             title: schema.posts.title,
@@ -27,65 +27,107 @@ export async function load() {
             featuredImage: schema.posts.featuredImage,
             publishedAt: schema.posts.publishedAt,
             categoryName: schema.categories.name,
+            categorySlug: schema.categories.slug,
+            views: schema.pageViews.views
+        })
+        .from(schema.posts)
+        .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+        .innerJoin(schema.pageViews, eq(schema.posts.id, schema.pageViews.postId))
+        .where(eq(schema.posts.published, 1))
+        .orderBy(desc(schema.pageViews.views))
+        .limit(10)
+        .all();
+
+    // 2. Main Posts Fetch
+    const allPublished = db
+        .select({
+            id: schema.posts.id,
+            title: schema.posts.title,
+            slug: schema.posts.slug,
+            excerpt: schema.posts.excerpt,
+            featuredImage: schema.posts.featuredImage,
+            isFeatured: schema.posts.isFeatured,
+            isExclusive: schema.posts.isExclusive,
+            publishedAt: schema.posts.publishedAt,
+            categoryName: schema.categories.name,
             categorySlug: schema.categories.slug
         })
         .from(schema.posts)
         .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
-        .where(eq(schema.posts.published, true))
+        .where(eq(schema.posts.published, 1))
         .orderBy(desc(schema.posts.publishedAt))
         .limit(50)
         .all();
 
-    // Enhancing posts with video detection for "Home only" logic
     const enhancedPosts = allPublished.map(post => {
         const content = readMarkdownFile(post.slug);
         const videoUrl = extractVideoUrl(content);
-        // If no featured image but has video, or if we just want to mark it has video
-        return { ...post, videoUrl };
+        const publishedAt = post.publishedAt instanceof Date ? Math.floor(post.publishedAt.getTime() / 1000) : post.publishedAt;
+        return { ...post, videoUrl, publishedAt };
     });
 
-    // 2. Sections Mapping
-    const carouselPosts = enhancedPosts.slice(0, 4);
+    const popularPosts = popularPostsRaw.map(post => {
+        const publishedAt = post.publishedAt instanceof Date ? Math.floor(post.publishedAt.getTime() / 1000) : post.publishedAt;
+        return { ...post, publishedAt };
+    });
 
-    // Hero Layout
-    const freshStories = enhancedPosts.slice(4, 9);
-    const heroFeatured = enhancedPosts[9] || enhancedPosts[0];
-    const popularVisual = enhancedPosts.slice(10, 12);
-    const popularList = enhancedPosts.slice(12, 17);
+    // 3. Mapping
+    const carouselPosts = enhancedPosts.filter(p => p.isExclusive).slice(0, 4);
+    const backupCarousel = enhancedPosts.filter(p => !p.isExclusive).slice(0, 4 - carouselPosts.length);
+    const finalCarousel = [...carouselPosts, ...backupCarousel];
 
-    // Breaking Layout
-    const breakingGrid = enhancedPosts.slice(17, 21);
-    const breakingList = enhancedPosts.slice(21, 29);
+    const heroFeatured = enhancedPosts.find(p => p.isFeatured) || enhancedPosts[0];
+    const freshStories = enhancedPosts.filter(p => p.id !== heroFeatured?.id).slice(0, 5);
 
-    // Recent Layout
-    const recentFeatured = enhancedPosts[29] || enhancedPosts[0];
-    const recentGrid = enhancedPosts.slice(30, 36);
-    const recentSidebarFeatured = enhancedPosts[36] || enhancedPosts[1];
-    const recentSidebarList = enhancedPosts.slice(37, 42);
+    const breakingGrid = enhancedPosts
+        .filter(p => p.isExclusive)
+        .slice(0, 4);
 
+    const breakingList = enhancedPosts
+        .filter(p => p.isExclusive)
+        .filter(p => !breakingGrid.some(bg => bg.id === p.id))
+        .slice(0, 4);
+
+    const popularVisual = popularPosts.slice(0, 2);
+    const popularList = popularPosts.slice(2, 7);
+
+    const recentFeatured = enhancedPosts.filter(p => p.id !== heroFeatured?.id).slice(5, 6)[0] || enhancedPosts[0];
+    const recentGrid = enhancedPosts
+        .filter(p => p.id !== heroFeatured?.id && p.id !== recentFeatured?.id)
+        .slice(0, 6);
+
+    const recentSidebarFeatured = enhancedPosts
+        .filter(p => p.id !== heroFeatured?.id && !recentGrid.some(rg => rg.id === p.id))
+        .slice(0, 1)[0] || enhancedPosts[1];
+
+    const recentSidebarList = enhancedPosts
+        .filter(p => p.id !== heroFeatured?.id && !recentGrid.some(rg => rg.id === p.id) && p.id !== recentSidebarFeatured?.id)
+        .slice(0, 5);
+
+    // 4. Categories (from Junction Table)
     const categories = db
         .select({
             name: schema.categories.name,
             slug: schema.categories.slug
         })
         .from(schema.categories)
-        .innerJoin(schema.posts, and(eq(schema.categories.id, schema.posts.categoryId), eq(schema.posts.published, true)))
+        .innerJoin(schema.postCategories, eq(schema.categories.id, schema.postCategories.categoryId))
+        .innerJoin(schema.posts, and(eq(schema.postCategories.postId, schema.posts.id), eq(schema.posts.published, 1)))
         .groupBy(schema.categories.id)
         .orderBy(schema.categories.name)
         .all();
 
     return {
-        carouselPosts,
+        carouselPosts: finalCarousel,
         freshStories,
         heroFeatured,
         popularVisual,
         popularList,
         breakingGrid,
-        breakingList,
-        recentFeatured,
         recentGrid,
         recentSidebarFeatured,
         recentSidebarList,
-        categories
+        categories,
+        popularPosts
     };
 }

@@ -19,12 +19,12 @@ function generateUniqueSlug(title) {
 }
 
 // Helper to get or create category by name/label
-function getOrCreateCategory(label) {
-    if (!label) return null;
-    const name = label.trim();
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+function getOrCreateCategory(name) {
+    if (!name) return null;
+    const cleanName = name.trim();
+    const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-    let category = db.select().from(schema.categories).where(eq(schema.categories.name, name)).get();
+    let category = db.select().from(schema.categories).where(eq(schema.categories.name, cleanName)).get();
 
     if (!category) {
         // Try slug match
@@ -33,7 +33,7 @@ function getOrCreateCategory(label) {
 
     if (!category) {
         const result = db.insert(schema.categories).values({
-            name,
+            name: cleanName,
             slug,
             color: '#3b82f6'
         }).run();
@@ -53,7 +53,7 @@ export const actions = {
         const data = await request.formData();
         const title = data.get('title')?.toString().trim();
         const content = data.get('content')?.toString() || '';
-        const categoryLabel = data.get('categoryLabel')?.toString().trim();
+        const categoryLabelString = data.get('categoryLabel')?.toString().trim() || '';
         const excerpt = data.get('excerpt')?.toString().trim() || '';
         let featuredImage = data.get('featuredImage')?.toString().trim() || '';
         const featuredImageFile = data.get('featuredImageFile');
@@ -69,37 +69,66 @@ export const actions = {
         }
 
         if (!title) {
-            return fail(400, { error: 'Title is required', title, content, categoryLabel, excerpt, featuredImage });
+            return fail(400, { error: 'Title is required', title, content, categoryLabel: categoryLabelString, excerpt, featuredImage });
         }
 
         const slug = generateUniqueSlug(title);
-        const categoryId = getOrCreateCategory(categoryLabel);
 
-        // No manual slug collision check needed now, handled by generateUniqueSlug
+        // --- Multi-Category & Exclusive Logic ---
+        const rawLabels = categoryLabelString.split(',').map(l => l.trim()).filter(l => l !== '');
+        let isExclusive = false;
+        const finalLabels = [];
+
+        for (const label of rawLabels) {
+            if (label.toLowerCase() === 'exclusive') {
+                isExclusive = true;
+            } else {
+                finalLabels.push(label);
+            }
+        }
+
+        // Get IDs for valid categories
+        const categoryIds = finalLabels.map(l => getOrCreateCategory(l)).filter(id => id !== null);
+        const primaryCategoryId = categoryIds.length > 0 ? categoryIds[0] : null;
 
         // Save content to filesystem
         try {
             writeMarkdownFile(slug, content);
         } catch (e) {
             console.error('Failed to write markdown file:', e);
-            return fail(500, { error: 'Failed to save post content', title, slug, content, categoryId, excerpt, featuredImage });
+            return fail(500, { error: 'Failed to save post content', title, slug, content, categoryId: primaryCategoryId, excerpt, featuredImage });
         }
 
         const isPublish = action === 'publish';
         const inSitemap = data.get('inSitemap') === 'true';
+        const isFeatured = data.get('isFeatured') === 'true';
 
-        // Create the post metadata in DB (content is stored in FS)
-        db.insert(schema.posts).values({
+        // 1. Create the post metadata in DB
+        const result = db.insert(schema.posts).values({
             title,
             slug,
-            categoryId,
+            categoryId: primaryCategoryId, // Still keep primary for easy joining
             authorId: locals.user.id,
             excerpt: excerpt || null,
             featuredImage: featuredImage || null,
+            isFeatured,
+            isExclusive, // New flag
             published: isPublish,
             publishedAt: isPublish ? new Date() : null,
             inSitemap
         }).run();
+
+        const postId = Number(result.lastInsertRowid);
+
+        // 2. Insert into junction table
+        if (categoryIds.length > 0) {
+            for (const catId of categoryIds) {
+                db.insert(schema.postCategories).values({
+                    postId,
+                    categoryId: catId
+                }).run();
+            }
+        }
 
         throw redirect(303, '/admin/posts');
     }

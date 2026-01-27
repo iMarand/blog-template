@@ -3,7 +3,8 @@ import { readMarkdownFile, parseMarkdown } from '$lib/server/storage/filesystem.
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import { error } from '@sveltejs/kit';
-import { sql } from 'drizzle-orm';
+import { sql, eq, and, desc } from 'drizzle-orm';
+import { trackView } from '$lib/server/stats.js';
 
 // Configure marked with syntax highlighting
 marked.setOptions({
@@ -43,6 +44,9 @@ export async function load({ params }) {
         throw error(404, 'Post not found');
     }
 
+    // Track view
+    await trackView(slug, post.id);
+
     // Read markdown file
     const markdownContent = readMarkdownFile(slug);
     if (!markdownContent) {
@@ -78,8 +82,16 @@ export async function load({ params }) {
             .all()
         : [];
 
+    // Fetch approved comments
+    const comments = db.select()
+        .from(schema.comments)
+        .where(and(eq(schema.comments.postId, post.id), eq(schema.comments.approved, 1)))
+        .orderBy(desc(schema.comments.createdAt))
+        .all();
+
     return {
         post: { ...post, html, tags },
-        relatedPosts
+        relatedPosts,
+        comments
     };
 }

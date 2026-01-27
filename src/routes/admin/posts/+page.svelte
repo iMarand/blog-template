@@ -138,13 +138,22 @@
 									{/if}
 								</td>
 								<td class="hidden px-6 py-4 sm:table-cell">
-									<span
-										class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase {post.published
-											? 'bg-green-100 text-green-700'
-											: 'bg-amber-100 text-amber-700'}"
-									>
-										{post.published ? 'Published' : 'Draft'}
-									</span>
+									<div class="flex flex-col gap-1">
+										<span
+											class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase {post.published
+												? 'bg-green-100 text-green-700'
+												: 'bg-amber-100 text-amber-700'}"
+										>
+											{post.published ? 'Published' : 'Draft'}
+										</span>
+										{#if post.isFeatured}
+											<span
+												class="inline-flex items-center bg-blue-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 uppercase"
+											>
+												Featured
+											</span>
+										{/if}
+									</div>
 								</td>
 								<td class="hidden px-6 py-4 lg:table-cell">
 									<span class="text-xs font-medium text-slate-500">

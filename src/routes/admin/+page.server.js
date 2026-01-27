@@ -1,5 +1,5 @@
 import { db, schema } from '$lib/server/db/index.js';
-import { eq, desc, count } from 'drizzle-orm';
+import { eq, desc, count, sql } from 'drizzle-orm';
 
 export function load({ locals }) {
     const user = locals.user;
@@ -66,6 +66,24 @@ export function load({ locals }) {
         };
     });
 
+    // Get total views
+    const totalViewsResult = db.select({ total: sql`sum(${schema.pageViews.views})` }).from(schema.pageViews).get();
+    const totalViews = totalViewsResult?.total || 0;
+
+    // Get top posts by views
+    const topPosts = db
+        .select({
+            id: schema.posts.id,
+            title: schema.posts.title,
+            slug: schema.posts.slug,
+            views: schema.pageViews.views
+        })
+        .from(schema.pageViews)
+        .innerJoin(schema.posts, eq(schema.pageViews.postId, schema.posts.id))
+        .orderBy(desc(schema.pageViews.views))
+        .limit(5)
+        .all();
+
     return {
         user,
         stats: {
@@ -73,8 +91,10 @@ export function load({ locals }) {
             publishedPosts: publishedPosts.length,
             draftPosts: draftPosts.length,
             totalAuthors,
-            totalCategories: categories.length
+            totalCategories: categories.length,
+            totalViews
         },
-        recentPosts
+        recentPosts,
+        topPosts
     };
 }

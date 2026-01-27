@@ -54,11 +54,24 @@ export const posts = sqliteTable('posts', {
     authorId: integer('author_id').references(() => users.id),
     excerpt: text('excerpt'),
     featuredImage: text('featured_image'),
+    isFeatured: integer('is_featured', { mode: 'boolean' }).default(false),
+    isExclusive: integer('is_exclusive', { mode: 'boolean' }).default(false),
     published: integer('published', { mode: 'boolean' }).default(false),
     publishedAt: integer('published_at', { mode: 'timestamp' }),
     inSitemap: integer('in_sitemap', { mode: 'boolean' }).default(true),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
+});
+
+// Post categories junction table (Many-to-Many)
+export const postCategories = sqliteTable('post_categories', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    postId: integer('post_id')
+        .references(() => posts.id, { onDelete: 'cascade' })
+        .notNull(),
+    categoryId: integer('category_id')
+        .references(() => categories.id, { onDelete: 'cascade' })
+        .notNull()
 });
 
 // Pages table for static content
@@ -96,6 +109,28 @@ export const settings = sqliteTable('settings', {
     key: text('key').primaryKey(),
     value: text('value').notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
+});
+
+// Page views table
+export const pageViews = sqliteTable('page_views', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    postId: integer('post_id').references(() => posts.id, { onDelete: 'cascade' }),
+    slug: text('slug').notNull().unique(), // Can be post slug or page slug
+    views: integer('views').default(0).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
+});
+
+// Comments table
+export const comments = sqliteTable('comments', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    postId: integer('post_id')
+        .references(() => posts.id, { onDelete: 'cascade' })
+        .notNull(),
+    authorName: text('author_name').notNull(),
+    authorEmail: text('author_email'),
+    content: text('content').notNull(),
+    approved: integer('approved', { mode: 'boolean' }).default(true),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
 });
 
 // Subscribers table

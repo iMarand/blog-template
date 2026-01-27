@@ -236,6 +236,21 @@
 								Include in Sitemap
 							</label>
 						</div>
+						<div class="flex items-center gap-2 px-1 py-1">
+							<input
+								type="checkbox"
+								id="isFeatured"
+								name="isFeatured"
+								value="true"
+								class="h-4 w-4 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-600"
+							/>
+							<label
+								for="isFeatured"
+								class="cursor-pointer text-xs font-bold text-slate-700 uppercase"
+							>
+								Featured Post (Hero)
+							</label>
+						</div>
 						<button
 							type="submit"
 							name="action"
