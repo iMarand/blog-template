@@ -69,6 +69,9 @@ export async function load() {
             slug: schema.categories.slug
         })
         .from(schema.categories)
+        .innerJoin(schema.posts, and(eq(schema.categories.id, schema.posts.categoryId), eq(schema.posts.published, true)))
+        .groupBy(schema.categories.id)
+        .orderBy(schema.categories.name)
         .all();
 
     return {

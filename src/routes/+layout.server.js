@@ -1,5 +1,5 @@
 import { db, schema } from '$lib/server/db/index.js';
-import { sql } from 'drizzle-orm';
+import { sql, eq, and } from 'drizzle-orm';
 
 export async function load() {
     // Get categories with post counts for the footer
@@ -13,8 +13,9 @@ export async function load() {
             postCount: sql`count(${schema.posts.id})`
         })
         .from(schema.categories)
-        .leftJoin(schema.posts, sql`${schema.categories.id} = ${schema.posts.categoryId} AND ${schema.posts.published} = 1`)
+        .innerJoin(schema.posts, and(eq(schema.categories.id, schema.posts.categoryId), eq(schema.posts.published, true)))
         .groupBy(schema.categories.id)
+        .orderBy(schema.categories.name)
         .all();
 
     // Get latest posts for footer
@@ -36,7 +37,7 @@ export async function load() {
     const blogName = blogNameSetting?.value || 'NewsWeek';
 
     return {
-        commonCategories: categories.filter(c => c.postCount > 0),
+        commonCategories: categories,
         latestPosts: latestPosts,
         blogName
     };
