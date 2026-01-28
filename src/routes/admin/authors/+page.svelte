@@ -142,7 +142,8 @@
 												</div>
 												<div class="min-w-0">
 													<p class="truncate font-bold text-slate-900">
-														{author.displayName || author.username}
+														{author.displayName ||
+															(author.role === 'admin' ? 'Staff Writer' : author.username)}
 													</p>
 													<p class="text-[10px] font-bold text-slate-500 uppercase">
 														@{author.username} • {author.email || 'No email'}
@@ -171,6 +172,12 @@
 														{author.active ? 'Active' : 'Disabled'}
 													</button>
 												</form>
+												<a
+													href="/admin/authors/{author.id}"
+													class="ml-2 flex items-center gap-1.5 bg-slate-100 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
+												>
+													Edit
+												</a>
 											</div>
 										</td>
 									</tr>

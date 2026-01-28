@@ -59,15 +59,17 @@
 			cat: p.categoryName || 'GENERAL',
 			title: p.title,
 			slug: p.slug,
+			exclusive: p.isExclusive,
 			img: p.featuredImage || `https://picsum.photos/seed/${p.slug}/400/500`
 		}))
 	);
 
 	const breakingBottomList = $derived(
-		(data.breakingList || []).map((p) => ({
+		(data.breakingBottomList || []).map((p) => ({
 			cat: p.categoryName || 'GENERAL',
 			title: p.title,
 			slug: p.slug,
+			exclusive: p.isExclusive,
 			img: p.featuredImage || `https://picsum.photos/seed/${p.slug}/100/80`
 		}))
 	);
@@ -264,7 +266,7 @@
 				{#each popularVisual as item}
 					<div class="group">
 						<a href="/blog/{item.slug}" class="relative mb-3 block overflow-hidden rounded-sm">
-							<div class="aspect-[4/3] w-full">
+							<div class="aspect-[3/4] w-full">
 								<img
 									src={item.featuredImage || `https://picsum.photos/seed/${item.slug}/400/300`}
 									alt={item.title}
@@ -331,11 +333,11 @@
 				</div>
 			</div>
 
-			<div class="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				{#each breakingGrid as item, i}
 					<a
 						href="/blog/{item.slug}"
-						class="group relative block aspect-[3/4] overflow-hidden rounded-sm"
+						class="group relative block aspect-[3/4] overflow-hidden rounded-lg"
 					>
 						{#if i === 0}
 							<div class="absolute top-4 left-4 z-10 flex flex-col">
@@ -348,7 +350,7 @@
 						<img
 							src={item.img}
 							alt={item.title}
-							class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+							class="h-full w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-110"
 						/>
 						<div
 							class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6"
@@ -409,13 +411,13 @@
 		<div class="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_350px] lg:gap-20">
 			<!-- Main Feed -->
 			<div>
-				<div class="group mb-16 flex flex-col gap-10 border-b border-gray-100 pb-16 md:flex-row">
+				<div class="group mb-5 flex flex-col gap-10 border-b border-gray-100 pb-5 md:flex-row">
 					<div class="relative overflow-hidden rounded-sm md:w-1/2">
 						<img
 							src={recentFeatured.featuredImage ||
 								`https://picsum.photos/seed/${recentFeatured.slug}/600/400`}
 							alt=""
-							class="h-[300px] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+							class="h-[300px] w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-105"
 						/>
 						<span
 							class="absolute top-4 left-4 bg-black/80 px-3 py-1 text-[10px] font-black text-white uppercase"
@@ -450,13 +452,15 @@
 						</p>
 						<div class="flex items-center gap-3">
 							<div class="h-8 w-8 rounded-full bg-gray-200"></div>
-							<span class="text-xs font-black uppercase">Dan Bush</span>
+							<span class="text-xs font-black uppercase"
+								>{recentFeatured.authorName || 'Staff Writer'}</span
+							>
 						</div>
 					</div>
 				</div>
 
 				<!-- Recent Grid -->
-				<div class="grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
+				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 					{#each recentGrid as post}
 						<div class="group">
 							<a
@@ -466,11 +470,11 @@
 								<img
 									src={post.featuredImage || `https://picsum.photos/seed/${post.slug}/400/300`}
 									alt=""
-									class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+									class="h-full w-full object-cover transition-transform duration-500 rounded-lg group-hover:scale-110"
 								/>
 								<span
 									class="absolute top-4 left-4 bg-[#e31e24] px-2 py-1 text-[9px] font-black text-white uppercase"
-									>{heroFeatured.categoryName || 'GENERAL'}</span
+									>{post.categoryName || 'GENERAL'}</span
 								>
 							</a>
 							<div>
@@ -483,7 +487,9 @@
 									</h4></a
 								>
 								<div class="flex items-center gap-2 text-[10px] font-bold text-gray-400">
-									<span class="font-black text-black uppercase">Dan Bush</span>
+									<span class="font-black text-black uppercase"
+										>{post.authorName || 'Staff Writer'}</span
+									>
 									<span>—</span>
 									<span class="tracking-widest uppercase">{post.date}</span>
 								</div>
@@ -503,7 +509,7 @@
 								src={recentSidebarFeatured.featuredImage ||
 									`https://picsum.photos/seed/${recentSidebarFeatured.slug}/400/500`}
 								alt=""
-								class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+								class="h-full w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-105"
 							/>
 						</div>
 						<div

@@ -7,11 +7,12 @@ export const actions = {
         const data = await request.formData();
         const title = data.get('title')?.toString().trim();
         const content = data.get('content')?.toString() || '';
+        const externalUrl = data.get('externalUrl')?.toString().trim() || null;
         const action = data.get('action')?.toString();
         const inSitemap = data.get('inSitemap') === 'true';
 
         if (!title) {
-            return fail(400, { error: 'Title is required', title, content });
+            return fail(400, { error: 'Title is required', title, content, externalUrl });
         }
 
         let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -27,7 +28,8 @@ export const actions = {
         db.insert(schema.pages).values({
             title,
             slug,
-            content,
+            content: externalUrl ? null : content,
+            externalUrl,
             published: isPublish,
             inSitemap,
             updatedAt: new Date()

@@ -1,5 +1,5 @@
 import { db, schema } from '$lib/server/db/index.js';
-import { sql, eq, and } from 'drizzle-orm';
+import { sql, eq, and, desc } from 'drizzle-orm';
 
 export async function load() {
     // Get categories with post counts for the footer
@@ -24,12 +24,26 @@ export async function load() {
             title: schema.posts.title,
             slug: schema.posts.slug,
             featuredImage: schema.posts.featuredImage,
-            publishedAt: schema.posts.publishedAt
+            publishedAt: schema.posts.publishedAt,
+            categoryName: schema.categories.name
         })
         .from(schema.posts)
+        .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
         .where(eq(schema.posts.published, 1))
-        .orderBy(sql`${schema.posts.publishedAt} DESC`)
+        .orderBy(desc(schema.posts.publishedAt))
         .limit(3)
+        .all();
+
+    // Fetch published pages for footer
+    const footerPages = db
+        .select({
+            title: schema.pages.title,
+            slug: schema.pages.slug,
+            externalUrl: schema.pages.externalUrl
+        })
+        .from(schema.pages)
+        .where(eq(schema.pages.published, 1))
+        .orderBy(schema.pages.title)
         .all();
 
     // Get blog name from settings
@@ -39,6 +53,7 @@ export async function load() {
     return {
         commonCategories: categories,
         latestPosts: latestPosts,
+        footerPages,
         blogName
     };
 }

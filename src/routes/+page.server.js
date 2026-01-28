@@ -49,14 +49,16 @@ export async function load() {
             isFeatured: schema.posts.isFeatured,
             isExclusive: schema.posts.isExclusive,
             publishedAt: schema.posts.publishedAt,
+            authorName: schema.users.displayName,
             categoryName: schema.categories.name,
             categorySlug: schema.categories.slug
         })
         .from(schema.posts)
         .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+        .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
         .where(eq(schema.posts.published, 1))
         .orderBy(desc(schema.posts.publishedAt))
-        .limit(50)
+        .limit(60)
         .all();
 
     const enhancedPosts = allPublished.map(post => {
@@ -71,40 +73,67 @@ export async function load() {
         return { ...post, publishedAt };
     });
 
-    // 3. Mapping
-    const carouselPosts = enhancedPosts.filter(p => p.isExclusive).slice(0, 4);
-    const backupCarousel = enhancedPosts.filter(p => !p.isExclusive).slice(0, 4 - carouselPosts.length);
-    const finalCarousel = [...carouselPosts, ...backupCarousel];
+    // 3. De-duplication Logic
+    const shownIds = new Set();
 
-    const heroFeatured = enhancedPosts.find(p => p.isFeatured) || enhancedPosts[0];
-    const freshStories = enhancedPosts.filter(p => p.id !== heroFeatured?.id).slice(0, 5);
+    // Helper to get unique posts for a section
+    function getUniquePosts(source, count, filter = () => true, allowOverlap = false) {
+        const result = [];
+        for (const p of source) {
+            if ((allowOverlap || !shownIds.has(p.id)) && filter(p)) {
+                result.push(p);
+                if (!allowOverlap) shownIds.add(p.id);
+                if (result.length === count) break;
+            }
+        }
+        return result;
+    }
 
-    const breakingGrid = enhancedPosts
-        .filter(p => p.isExclusive)
+    // Carousel: Priority is Exclusive
+    const carouselPosts = getUniquePosts(enhancedPosts, 4, p => p.isExclusive);
+    if (carouselPosts.length < 4) {
+        const fillers = getUniquePosts(enhancedPosts, 4 - carouselPosts.length);
+        carouselPosts.push(...fillers);
+    }
+
+    // Hero Featured
+    let heroFeatured = enhancedPosts.find(p => p.isFeatured && !shownIds.has(p.id));
+    if (!heroFeatured) {
+        heroFeatured = enhancedPosts.find(p => !shownIds.has(p.id)) || enhancedPosts[0];
+    }
+    shownIds.add(heroFeatured.id);
+
+    // Fresh Stories
+    const freshStories = getUniquePosts(enhancedPosts, 5);
+
+    // Breaking News / Exclusive Section: Allow overlap for isExclusive posts 
+    // but try to keep them unique within THIS section.
+    // We already added carousel posts to shownIds. 
+    // If we want them to reappear here, we use allowOverlap: true.
+    const breakingGrid = getUniquePosts(enhancedPosts, 4, p => p.isExclusive, true);
+
+    // For the list below the grid, we want to try to NOT duplicate what's in breakingGrid
+    const gridIds = new Set(breakingGrid.map(p => p.id));
+    const breakingBottomList = enhancedPosts
+        .filter(p => p.isExclusive && !gridIds.has(p.id))
         .slice(0, 4);
 
-    const breakingList = enhancedPosts
-        .filter(p => p.isExclusive)
-        .filter(p => !breakingGrid.some(bg => bg.id === p.id))
-        .slice(0, 4);
+    // If breakingGrid or breakingBottomList are still empty (no isExclusive posts at all),
+    // maybe fill with latest news but that might defeat the "Exclusive" purpose.
+    // However, the user said they HAVE Exclusive content.
 
+    // Recent Content
+    const recentFeatured = getUniquePosts(enhancedPosts, 1)[0] || enhancedPosts[0];
+    const recentGrid = getUniquePosts(enhancedPosts, 6);
+
+    const recentSidebarFeatured = getUniquePosts(enhancedPosts, 1)[0] || enhancedPosts[1];
+    const recentSidebarList = getUniquePosts(enhancedPosts, 5);
+
+    // Popular Posts Slices
     const popularVisual = popularPosts.slice(0, 2);
     const popularList = popularPosts.slice(2, 7);
 
-    const recentFeatured = enhancedPosts.filter(p => p.id !== heroFeatured?.id).slice(5, 6)[0] || enhancedPosts[0];
-    const recentGrid = enhancedPosts
-        .filter(p => p.id !== heroFeatured?.id && p.id !== recentFeatured?.id)
-        .slice(0, 6);
-
-    const recentSidebarFeatured = enhancedPosts
-        .filter(p => p.id !== heroFeatured?.id && !recentGrid.some(rg => rg.id === p.id))
-        .slice(0, 1)[0] || enhancedPosts[1];
-
-    const recentSidebarList = enhancedPosts
-        .filter(p => p.id !== heroFeatured?.id && !recentGrid.some(rg => rg.id === p.id) && p.id !== recentSidebarFeatured?.id)
-        .slice(0, 5);
-
-    // 4. Categories (from Junction Table)
+    // 4. Categories aggregation
     const categories = db
         .select({
             name: schema.categories.name,
@@ -118,12 +147,14 @@ export async function load() {
         .all();
 
     return {
-        carouselPosts: finalCarousel,
+        carouselPosts,
         freshStories,
         heroFeatured,
         popularVisual,
         popularList,
         breakingGrid,
+        breakingBottomList,
+        recentFeatured,
         recentGrid,
         recentSidebarFeatured,
         recentSidebarList,

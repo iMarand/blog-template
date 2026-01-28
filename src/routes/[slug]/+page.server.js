@@ -13,6 +13,11 @@ export async function load({ params }) {
 
     if (!page) throw error(404, 'Page not found');
 
+    // Handle External Link Redirect
+    if (page.externalUrl) {
+        throw redirect(302, page.externalUrl);
+    }
+
     // Track view (postId is null for static pages if they are not in posts table)
     await trackView(params.slug);
 

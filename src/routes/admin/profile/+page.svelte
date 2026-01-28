@@ -34,6 +34,7 @@
 				<form
 					method="POST"
 					action="?/updateProfile"
+					enctype="multipart/form-data"
 					class="space-y-4"
 					use:enhance={() => {
 						loading = true;
@@ -94,6 +95,46 @@
 							class="w-full cursor-not-allowed border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-500"
 						/>
 						<p class="mt-1 text-[10px] text-slate-400">Username cannot be changed.</p>
+					</div>
+
+					<div>
+						<label class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+							>Bio</label
+						>
+						<textarea
+							name="bio"
+							rows="4"
+							class="w-full border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+							placeholder="Tell readers about yourself...">{data.user.bio || ''}</textarea
+						>
+					</div>
+
+					<div class="space-y-4">
+						<label class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+							>Profile Picture</label
+						>
+						<div class="flex items-center gap-4">
+							<div
+								class="h-16 w-16 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-200"
+							>
+								{#if data.user.avatarUrl}
+									<img src={data.user.avatarUrl} alt="Avatar" class="h-full w-full object-cover" />
+								{:else}
+									<div class="flex h-full w-full items-center justify-center text-slate-400">
+										<User class="h-8 w-8" />
+									</div>
+								{/if}
+							</div>
+							<div class="flex-1">
+								<input
+									type="file"
+									name="avatarFile"
+									accept="image/*"
+									class="w-full text-xs text-slate-500 file:mr-4 file:rounded-sm file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-800"
+								/>
+								<p class="mt-1 text-[10px] text-slate-400">JPG, PNG or WEBP. Max 2MB.</p>
+							</div>
+						</div>
 					</div>
 
 					<div class="pt-2">

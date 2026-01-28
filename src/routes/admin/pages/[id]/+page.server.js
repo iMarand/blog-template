@@ -17,11 +17,12 @@ export const actions = {
         const data = await request.formData();
         const title = data.get('title')?.toString().trim();
         const content = data.get('content')?.toString() || '';
+        const externalUrl = data.get('externalUrl')?.toString().trim() || null;
         const action = data.get('action')?.toString();
         const inSitemap = data.get('inSitemap') === 'true';
 
         if (!title) {
-            return fail(400, { error: 'Title is required', title, content });
+            return fail(400, { error: 'Title is required', title, content, externalUrl });
         }
 
         const existingPage = db.select().from(schema.pages).where(eq(schema.pages.id, id)).get();
@@ -41,7 +42,8 @@ export const actions = {
         db.update(schema.pages).set({
             title,
             slug,
-            content,
+            content: externalUrl ? null : content,
+            externalUrl,
             published,
             inSitemap,
             updatedAt: new Date()

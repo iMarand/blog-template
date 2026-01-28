@@ -21,6 +21,7 @@
 	let loading = $state(false);
 	let title = $state(form?.title ?? '');
 	let content = $state(form?.content ?? '');
+	let externalUrl = $state(form?.externalUrl ?? '');
 	let showPreview = $state(false);
 
 	let preview = $derived(marked(content || ''));
@@ -100,6 +101,22 @@
 					/>
 				</div>
 
+				<div class="border border-slate-200 bg-white p-6 shadow-sm">
+					<label class="mb-2 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+						>External Link URL (Optional)</label
+					>
+					<input
+						type="text"
+						name="externalUrl"
+						bind:value={externalUrl}
+						class="w-full border-0 border-b-2 border-slate-200 px-0 py-2 text-base font-medium text-slate-900 placeholder:text-slate-300 focus:border-blue-600 focus:ring-0"
+						placeholder="https://example.com or /internal-path (leave empty for standard pages)"
+					/>
+					<p class="mt-2 text-[10px] text-slate-400">
+						If provided, this page will act as a direct link and content below will be ignored.
+					</p>
+				</div>
+
 				<div class="border border-slate-200 bg-white shadow-sm">
 					<div
 						class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2"
@@ -127,7 +144,17 @@
 							{showPreview ? 'Edit' : 'Preview'}
 						</button>
 					</div>
-					{#if showPreview}
+					{#if externalUrl}
+						<div class="flex min-h-[500px] flex-col items-center justify-center p-6 text-center">
+							<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+								<Link class="h-6 w-6 text-blue-600" />
+							</div>
+							<h3 class="text-sm font-bold tracking-wider text-slate-900 uppercase">Link Active</h3>
+							<p class="mt-2 text-xs text-slate-500">
+								Content editing is disabled while an External Link is set.
+							</p>
+						</div>
+					{:else if showPreview}
 						<div class="prose min-h-[500px] max-w-none p-6 font-[Inter] prose-slate">
 							{#if preview}
 								{@html preview}

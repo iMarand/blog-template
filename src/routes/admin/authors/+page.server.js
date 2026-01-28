@@ -8,7 +8,6 @@ export function load({ locals, url }) {
     const authors = db
         .select()
         .from(schema.users)
-        .where(eq(schema.users.role, 'author'))
         .all()
         .map(author => {
             const postCount = db

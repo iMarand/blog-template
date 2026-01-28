@@ -9,6 +9,8 @@ export const users = sqliteTable('users', {
     passwordHash: text('password_hash').notNull(),
     role: text('role').notNull().default('author'), // 'admin' or 'author'
     displayName: text('display_name'),
+    bio: text('bio'),
+    avatarUrl: text('avatar_url'),
     active: integer('active', { mode: 'boolean' }).default(true),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
@@ -79,7 +81,8 @@ export const pages = sqliteTable('pages', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title').notNull(),
     slug: text('slug').notNull().unique(),
-    content: text('content').notNull(),
+    content: text('content'), // Changed to nullable to allow link-only pages
+    externalUrl: text('external_url'), // New column
     published: integer('published', { mode: 'boolean' }).default(false),
     inSitemap: integer('in_sitemap', { mode: 'boolean' }).default(true),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),

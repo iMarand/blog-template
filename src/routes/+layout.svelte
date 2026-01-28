@@ -29,6 +29,7 @@
 		<Footer
 			categories={data.commonCategories}
 			latestNews={data.latestPosts}
+			footerPages={data.footerPages}
 			blogName={data.blogName}
 		/>
 	{/if}

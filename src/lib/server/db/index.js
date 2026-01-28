@@ -29,6 +29,8 @@ function createTables() {
             password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'author',
             display_name TEXT,
+            bio TEXT,
+            avatar_url TEXT,
             active INTEGER DEFAULT 1,
             created_at INTEGER DEFAULT (unixepoch()),
             updated_at INTEGER DEFAULT (unixepoch())
@@ -202,7 +204,8 @@ function createTables() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             slug TEXT NOT NULL UNIQUE,
-            content TEXT NOT NULL,
+            content TEXT,
+            external_url TEXT,
             published INTEGER DEFAULT 0,
             in_sitemap INTEGER DEFAULT 1,
             created_at INTEGER DEFAULT (unixepoch()),

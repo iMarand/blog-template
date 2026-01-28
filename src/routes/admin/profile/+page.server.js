@@ -22,13 +22,26 @@ export const actions = {
         const data = await request.formData();
         const displayName = data.get('displayName')?.toString().trim();
         const email = data.get('email')?.toString().trim();
+        const bio = data.get('bio')?.toString().trim() || null;
+        let avatarUrl = data.get('avatarUrl')?.toString().trim() || null;
+        const avatarFile = data.get('avatarFile');
+
+        if (avatarFile && avatarFile instanceof File && avatarFile.size > 0) {
+            try {
+                const { saveUpload } = await import('$lib/server/storage/filesystem.js');
+                const filename = await saveUpload(avatarFile);
+                avatarUrl = `/api/uploads/${filename}`;
+            } catch (e) {
+                console.error('Failed to upload avatar:', e);
+            }
+        }
 
         if (!displayName) {
-            return fail(400, { profileError: 'Display name is required', displayName, email });
+            return fail(400, { profileError: 'Display name is required', displayName, email, bio, avatarUrl });
         }
 
         if (!email) {
-            return fail(400, { profileError: 'Email is required', displayName, email });
+            return fail(400, { profileError: 'Email is required', displayName, email, bio, avatarUrl });
         }
 
         try {
@@ -36,6 +49,8 @@ export const actions = {
                 .set({
                     displayName,
                     email,
+                    bio,
+                    avatarUrl,
                     updatedAt: new Date()
                 })
                 .where(eq(schema.users.id, locals.user.id))

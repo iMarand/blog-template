@@ -1,5 +1,5 @@
 <script>
-	let { categories = [], latestNews = [], blogName = 'NewsWeek' } = $props();
+	let { categories = [], latestNews = [], footerPages = [], blogName = 'NewsWeek' } = $props();
 	let email = $state('');
 	let status = $state(''); // 'loading', 'success', 'error'
 	let message = $state('');
@@ -101,27 +101,16 @@
 			<div class="lg:pl-5">
 				<h3 class="m-0 mb-6 text-2xl font-black">Company</h3>
 				<ul class="m-0 list-none p-0">
-					<li class="mb-3">
-						<a
-							href="/about"
-							class="text-sm font-black text-black no-underline transition-colors hover:text-[#e31e24]"
-							>About</a
-						>
-					</li>
-					<li class="mb-3">
-						<a
-							href="/contact"
-							class="text-sm font-black text-black no-underline transition-colors hover:text-[#e31e24]"
-							>Contact us</a
-						>
-					</li>
-					<li class="mb-3">
-						<a
-							href="/privacy"
-							class="text-sm font-black text-black no-underline transition-colors hover:text-[#e31e24]"
-							>Privacy Policy</a
-						>
-					</li>
+					{#each footerPages as page}
+						<li class="mb-3">
+							<a
+								href={page.externalUrl || `/${page.slug}`}
+								target={page.externalUrl?.startsWith('http') ? '_blank' : '_self'}
+								class="text-sm font-black text-black no-underline transition-colors hover:text-[#e31e24]"
+								>{page.title}</a
+							>
+						</li>
+					{/each}
 				</ul>
 			</div>
 
