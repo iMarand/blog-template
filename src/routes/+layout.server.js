@@ -46,14 +46,21 @@ export async function load() {
         .orderBy(schema.pages.title)
         .all();
 
-    // Get blog name from settings
-    const blogNameSetting = db.select().from(schema.settings).where(sql`${schema.settings.key} = 'blog_name'`).get();
-    const blogName = blogNameSetting?.value || 'NewsWeek';
+    // Get all settings
+    const allSettings = db.select().from(schema.settings).all();
+    const siteSettings = allSettings.reduce((acc, curr) => {
+        acc[curr.key] = curr.value;
+        return acc;
+    }, {});
+
+    // Backward compatibility for blogName
+    const blogName = siteSettings.blog_name || 'NewsWeek';
 
     return {
         commonCategories: categories,
         latestPosts: latestPosts,
         footerPages,
-        blogName
+        blogName,
+        siteSettings
     };
 }

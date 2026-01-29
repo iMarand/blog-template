@@ -7,6 +7,7 @@
 	const categories = $derived((data.categories || []).map((c) => c.name));
 	const categoryList = $derived(data.categories || []);
 	const popularPosts = $derived(data.popularPosts || []);
+	const blogName = $derived(data.blogName || 'ExtraMele');
 
 	const carouselPosts = $derived(
 		(data.carouselPosts || []).map((p) => ({
@@ -80,7 +81,6 @@
 	const recentGrid = $derived(
 		(data.recentGrid || []).map((p) => ({
 			...p,
-			author: 'Dan Bush',
 			date: p.publishedAt
 				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
 						month: 'long',
@@ -130,7 +130,7 @@
 </script>
 
 <svelte:head>
-	<title>NewsWeek PRO - Your Source for Latest News</title>
+	<title>{blogName} - Your Source for extra articles and information</title>
 </svelte:head>
 
 {#snippet exclusiveBadge()}
@@ -350,7 +350,7 @@
 						<img
 							src={item.img}
 							alt={item.title}
-							class="h-full w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-110"
+							class="h-full w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-110"
 						/>
 						<div
 							class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6"
@@ -417,7 +417,7 @@
 							src={recentFeatured.featuredImage ||
 								`https://picsum.photos/seed/${recentFeatured.slug}/600/400`}
 							alt=""
-							class="h-[300px] w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-105"
+							class="h-[300px] w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-105"
 						/>
 						<span
 							class="absolute top-4 left-4 bg-black/80 px-3 py-1 text-[10px] font-black text-white uppercase"
@@ -451,7 +451,12 @@
 							{recentFeatured.excerpt || ''}
 						</p>
 						<div class="flex items-center gap-3">
-							<div class="h-8 w-8 rounded-full bg-gray-200"></div>
+							<img
+								src={recentFeatured.authorAvatar ||
+									`https://i.pravatar.cc/50?u=${recentFeatured.authorName || 'staff'}`}
+								alt={recentFeatured.authorName || 'Staff Writer'}
+								class="h-8 w-8 rounded-full object-cover"
+							/>
 							<span class="text-xs font-black uppercase"
 								>{recentFeatured.authorName || 'Staff Writer'}</span
 							>
@@ -470,7 +475,7 @@
 								<img
 									src={post.featuredImage || `https://picsum.photos/seed/${post.slug}/400/300`}
 									alt=""
-									class="h-full w-full object-cover transition-transform duration-500 rounded-lg group-hover:scale-110"
+									class="h-full w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-110"
 								/>
 								<span
 									class="absolute top-4 left-4 bg-[#e31e24] px-2 py-1 text-[9px] font-black text-white uppercase"
@@ -509,7 +514,7 @@
 								src={recentSidebarFeatured.featuredImage ||
 									`https://picsum.photos/seed/${recentSidebarFeatured.slug}/400/500`}
 								alt=""
-								class="h-full w-full object-cover rounded-lg transition-transform duration-700 group-hover:scale-105"
+								class="h-full w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-105"
 							/>
 						</div>
 						<div

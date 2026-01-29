@@ -1,8 +1,52 @@
 <script>
-	let { categories = [], latestNews = [], footerPages = [], blogName = 'NewsWeek' } = $props();
+	import { Facebook, Twitter, Youtube, Instagram, Share2 } from 'lucide-svelte';
+
+	let {
+		categories = [],
+		latestNews = [],
+		footerPages = [],
+		blogName = 'NewsWeek',
+		siteSettings = {}
+	} = $props();
 	let email = $state('');
 	let status = $state(''); // 'loading', 'success', 'error'
 	let message = $state('');
+
+	// Social links with dynamic values
+	const socialLinks = $derived(
+		[
+			{
+				name: 'Facebook',
+				icon: Facebook,
+				bg: 'bg-[#3b5999]',
+				href: siteSettings.social_facebook
+			},
+			{
+				name: 'Twitter',
+				icon: Twitter,
+				bg: 'bg-black',
+				href: siteSettings.social_twitter
+			},
+			{
+				name: 'YouTube',
+				icon: Youtube,
+				bg: 'bg-[#ff0000]',
+				href: siteSettings.social_youtube
+			},
+			{
+				name: 'Instagram',
+				icon: Instagram,
+				bg: 'bg-[#e1306c]',
+				href: siteSettings.social_instagram
+			},
+			{
+				name: 'TikTok',
+				icon: Share2,
+				bg: 'bg-black',
+				href: siteSettings.social_tiktok
+			}
+		].filter((link) => link.href)
+	);
 
 	async function subscribe(e) {
 		e.preventDefault();
@@ -70,31 +114,23 @@
 			<div>
 				<h3 class="m-0 mb-6 text-2xl font-black">About us</h3>
 				<p class="mb-6 text-sm leading-relaxed text-gray-700">
-					{blogName} PRO is your ultimate source for the latest in technology, lifestyle, and global trends.
-					We bring you curated stories that matter.
+					{siteSettings.blog_description ||
+						`${blogName} PRO is your ultimate source for the latest in technology, lifestyle, and global trends. We bring you curated stories that matter.`}
 				</p>
-				<div class="flex gap-2">
-					<a
-						href="/"
-						class="flex h-9 w-9 items-center justify-center rounded-sm bg-black font-bold text-white no-underline transition-colors hover:bg-[#e31e24]"
-						>f</a
-					>
-					<a
-						href="/"
-						class="flex h-9 w-9 items-center justify-center rounded-sm bg-black font-bold text-white no-underline transition-colors hover:bg-[#e31e24]"
-						>📸</a
-					>
-					<a
-						href="/"
-						class="flex h-9 w-9 items-center justify-center rounded-sm bg-black font-bold text-white no-underline transition-colors hover:bg-[#e31e24]"
-						>𝕏</a
-					>
-					<a
-						href="/"
-						class="flex h-9 w-9 items-center justify-center rounded-sm bg-black font-bold text-white no-underline transition-colors hover:bg-[#e31e24]"
-						>▶</a
-					>
-				</div>
+				{#if socialLinks.length > 0}
+					<div class="flex gap-2">
+						{#each socialLinks as social}
+							<a
+								href={social.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="{social.bg} group flex h-10 w-10 items-center justify-center rounded-sm text-white transition-transform hover:-translate-y-1"
+							>
+								<social.icon class="h-4 w-4 transition-transform group-hover:scale-110" />
+							</a>
+						{/each}
+					</div>
+				{/if}
 			</div>
 
 			<!-- Company -->

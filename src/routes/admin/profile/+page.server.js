@@ -63,32 +63,20 @@ export const actions = {
         }
     },
 
-    updateSettings: async ({ request, locals }) => {
-        // Only admin can update settings
-        if (locals.user.role !== 'admin') {
-            return fail(403, { settingsError: 'Unauthorized' });
-        }
-
-        const data = await request.formData();
-        const blogName = data.get('blogName')?.toString().trim();
-
-        if (!blogName) {
-            return fail(400, { settingsError: 'Blog name is required' });
-        }
-
+    deleteAvatar: async ({ locals }) => {
         try {
-            db.insert(schema.settings)
-                .values({ key: 'blog_name', value: blogName, updatedAt: new Date() })
-                .onConflictDoUpdate({
-                    target: schema.settings.key,
-                    set: { value: blogName, updatedAt: new Date() }
+            db.update(schema.users)
+                .set({
+                    avatarUrl: null,
+                    updatedAt: new Date()
                 })
+                .where(eq(schema.users.id, locals.user.id))
                 .run();
 
-            return { settingsSuccess: true };
+            return { profileSuccess: true };
         } catch (e) {
-            console.error('Settings update error:', e);
-            return fail(500, { settingsError: 'Failed to update settings' });
+            console.error('Delete avatar error:', e);
+            return fail(500, { profileError: 'Failed to delete avatar' });
         }
     },
 

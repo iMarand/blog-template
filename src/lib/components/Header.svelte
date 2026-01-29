@@ -224,22 +224,24 @@
 				</button>
 			</div>
 
-			<nav class="flex flex-col gap-5">
-				<a
-					href="/"
-					class="border-b border-gray-100 pb-2 text-xl font-black text-black no-underline hover:text-[#e31e24]"
-					>Home</a
-				>
-				{#each categories as cat}
+			<div class="thin-scrollbar flex-1 overflow-y-auto pr-2">
+				<nav class="flex flex-col gap-5">
 					<a
-						href="/category/{cat.slug}"
-						class="text-base font-bold text-gray-700 no-underline transition-colors hover:text-[#e31e24]"
-						onclick={() => (menuOpen = false)}
+						href="/"
+						class="border-b border-gray-100 pb-2 text-xl font-black text-black no-underline hover:text-[#e31e24]"
+						>Home</a
 					>
-						{cat.name}
-					</a>
-				{/each}
-			</nav>
+					{#each categories as cat}
+						<a
+							href="/category/{cat.slug}"
+							class="text-base font-bold text-gray-700 no-underline transition-colors hover:text-[#e31e24]"
+							onclick={() => (menuOpen = false)}
+						>
+							{cat.name}
+						</a>
+					{/each}
+				</nav>
+			</div>
 
 			<div class="mt-auto border-t border-gray-100 pt-10">
 				<button
@@ -276,5 +278,20 @@
 	.no-scrollbar {
 		-ms-overflow-style: none;
 		scrollbar-width: none;
+	}
+
+	/* Thin Scrollbar for Mobile Menu */
+	.thin-scrollbar::-webkit-scrollbar {
+		width: 4px;
+	}
+	.thin-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.thin-scrollbar::-webkit-scrollbar-thumb {
+		background-color: #e5e7eb;
+		border-radius: 20px;
+	}
+	.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+		background-color: #d1d5db;
 	}
 </style>

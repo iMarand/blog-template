@@ -2,10 +2,11 @@
 	let { data } = $props();
 	const posts = $derived(data.posts || []);
 	const query = $derived(data.query);
+	const blogName = $derived(data.blogName || 'ExtraMele');
 </script>
 
 <svelte:head>
-	<title>Search results for "{query}" - NewsWeek PRO</title>
+	<title>Search results for "{query}" - {blogName}</title>
 </svelte:head>
 
 <div class="bg-white font-[Roboto] text-[#222]">

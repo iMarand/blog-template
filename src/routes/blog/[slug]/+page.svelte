@@ -14,6 +14,18 @@
 	const comments = $derived(data.comments || []);
 	const previousPost = $derived(data.previousPost);
 	const nextPost = $derived(data.nextPost);
+	const blogName = $derived(data.blogName || 'ExtraMele');
+	const settings = $derived(data.siteSettings || {});
+
+	// Social links for author bio section (using site social links as fallback/default)
+	const socialLinks = $derived(
+		[
+			{ icon: 'f', href: settings.social_facebook },
+			{ icon: '📸', href: settings.social_instagram },
+			{ icon: '𝕏', href: settings.social_twitter },
+			{ icon: '▶', href: settings.social_youtube }
+		].filter((link) => link.href)
+	);
 
 	function share(platform) {
 		const url = encodeURIComponent(window.location.href);
@@ -84,7 +96,7 @@
 </script>
 
 <svelte:head>
-	<title>{post.title} - NewsWeek PRO</title>
+	<title>{post.title} - {blogName}</title>
 	<meta name="description" content={post.excerpt || post.title} />
 </svelte:head>
 
@@ -120,7 +132,7 @@
 	<!-- Info Bar Removed -->
 
 	<div
-		class="mx-auto grid max-w-[1300px] grid-cols-1 gap-12 px-5 py-10 sm:gap-16 sm:py-16 lg:grid-cols-[1fr_350px]"
+		class="relative mx-auto grid max-w-[1300px] grid-cols-1 items-start gap-12 px-5 py-10 sm:gap-16 sm:py-16 lg:grid-cols-[1fr_320px]"
 	>
 		<!-- Main Content -->
 		<div class="min-w-0">
@@ -205,18 +217,24 @@
 					<div>
 						<h3 class="mb-1 text-xl font-black">{post.authorName || 'Staff Writer'}</h3>
 						<div class="hidden max-w-lg text-sm leading-relaxed text-gray-600 sm:block">
-							{post.authorBio || 'Staff Writer at NewsWeek.'}
+							{post.authorBio || `Staff Writer at ${blogName}.`}
 						</div>
 					</div>
 				</div>
 				<div class="text-sm leading-relaxed text-gray-600 sm:hidden">
-					{post.authorBio || 'Staff Writer at NewsWeek.'}
+					{post.authorBio || `Staff Writer at ${blogName}.`}
 				</div>
 				<div class="mt-4 flex gap-6 text-lg text-gray-400 sm:mt-0">
-					<span class="cursor-pointer hover:text-[#e31e24]">f</span>
-					<span class="cursor-pointer hover:text-[#e31e24]">📸</span>
-					<span class="cursor-pointer hover:text-[#e31e24]">𝕏</span>
-					<span class="cursor-pointer hover:text-[#e31e24]">▶</span>
+					{#each socialLinks as link}
+						<a
+							href={link.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="cursor-pointer text-gray-400 no-underline hover:text-[#e31e24]"
+						>
+							{link.icon}
+						</a>
+					{/each}
 				</div>
 			</div>
 
@@ -323,9 +341,9 @@
 		</div>
 
 		<!-- Sidebar -->
-		<aside class="space-y-12 sm:space-y-16">
+		<aside class="h-fit space-y-0 sm:space-y-16 lg:sticky lg:top-24 lg:z-10 lg:self-start">
 			<!-- Share Post & Meta -->
-			<div class="space-y-8 rounded-sm border border-gray-100 bg-white p-8 shadow-sm">
+			<div class="space-y-5 rounded-sm border border-gray-100 bg-white p-8 shadow-sm">
 				<div class="text-center">
 					<h3 class="mb-6 text-[10px] font-black tracking-widest uppercase">Share Post:</h3>
 					<div class="grid grid-cols-4 gap-2">
@@ -352,15 +370,15 @@
 					</div>
 				</div>
 
-				<div class="space-y-4 border-t border-gray-100 pt-8">
-					<div class="flex flex-col gap-1">
+				<div class="space-y-4 border-t border-gray-100 pt-3">
+					<!-- <div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black tracking-widest text-gray-400 uppercase"
 							>Written By:</span
 						>
 						<span class="text-sm font-black text-black uppercase"
 							>{post.authorName || 'Staff Writer'}</span
 						>
-					</div>
+					</div> -->
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black tracking-widest text-gray-400 uppercase"
 							>Published On:</span
@@ -405,7 +423,7 @@
 
 			<!-- Popular Section -->
 			<div>
-				<div class="mb-8 border-b-4 border-black pb-2">
+				<div class="mb-4 border-b-4 border-black pb-2">
 					<h2 class="text-xl font-black tracking-tighter uppercase">More - Posts</h2>
 				</div>
 				<div class="space-y-8">
@@ -592,6 +610,15 @@
 	@media (min-width: 768px) {
 		:global(.ad-slot-auto.is-active) {
 			min-height: 280px;
+		}
+	}
+
+	/* Sticky Sidebar for Desktop */
+	@media (min-width: 1024px) {
+		aside {
+			position: sticky;
+			top: 100px; /* Offset from top below header */
+			align-self: start;
 		}
 	}
 </style>

@@ -25,7 +25,8 @@
 		{ href: '/admin/subscribers', icon: Users, label: 'SUBSCRIBERS', adminOnly: true },
 		{ href: '/admin/comments', icon: PenTool, label: 'COMMENTS' },
 		{ href: '/admin/authors', icon: Users, label: 'AUTHORS', adminOnly: true },
-		{ href: '/admin/profile', icon: Users, label: 'MY PROFILE' }
+		{ href: '/admin/profile', icon: Users, label: 'MY PROFILE' },
+		{ href: '/admin/settings', icon: Settings, label: 'SETTINGS', adminOnly: true }
 	];
 
 	function isActive(href, exact = false) {
@@ -57,7 +58,7 @@
 	<!-- Sidebar -->
 	{#if !isAuthPage}
 		<aside
-			class="fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 lg:static lg:transform-none {sidebarOpen
+			class="fixed inset-y-0 left-0 z-50 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:transform-none {sidebarOpen
 				? 'translate-x-0'
 				: '-translate-x-full lg:translate-x-0'}"
 		>

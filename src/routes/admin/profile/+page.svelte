@@ -1,6 +1,6 @@
 <script>
 	import { enhance } from '$app/forms';
-	import { User, Lock, Save, AlertCircle, Settings } from 'lucide-svelte';
+	import { User, Lock, Save, AlertCircle, Settings, Trash2 } from 'lucide-svelte';
 
 	let { data, form } = $props();
 	let loading = $state(false);
@@ -113,7 +113,7 @@
 						<label class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
 							>Profile Picture</label
 						>
-						<div class="flex items-center gap-4">
+						<div class="flex items-start gap-4">
 							<div
 								class="h-16 w-16 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-200"
 							>
@@ -125,14 +125,26 @@
 									</div>
 								{/if}
 							</div>
-							<div class="flex-1">
-								<input
-									type="file"
-									name="avatarFile"
-									accept="image/*"
-									class="w-full text-xs text-slate-500 file:mr-4 file:rounded-sm file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-800"
-								/>
-								<p class="mt-1 text-[10px] text-slate-400">JPG, PNG or WEBP. Max 2MB.</p>
+							<div class="flex-1 space-y-3">
+								<div>
+									<input
+										type="file"
+										name="avatarFile"
+										accept="image/*"
+										class="w-full text-xs text-slate-500 file:mr-4 file:rounded-sm file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-800"
+									/>
+									<p class="mt-1 text-[10px] text-slate-400">JPG, PNG or WEBP. Max 2MB.</p>
+								</div>
+
+								{#if data.user.avatarUrl}
+									<button
+										formaction="?/deleteAvatar"
+										class="flex items-center gap-1.5 px-2 text-xs font-bold text-red-600 hover:text-red-700 hover:underline"
+									>
+										<Trash2 class="h-3 w-3" />
+										Remove current picture
+									</button>
+								{/if}
 							</div>
 						</div>
 					</div>
@@ -153,79 +165,6 @@
 					</div>
 				</form>
 			</div>
-
-			<!-- Site Settings (Admin only) -->
-			{#if data.user.role === 'admin'}
-				<div class="relative overflow-hidden border border-slate-200 bg-white p-6 shadow-sm">
-					<div class="absolute top-0 right-0 p-4 opacity-5">
-						<Settings class="h-24 w-24 text-slate-900" />
-					</div>
-					<h2
-						class="mb-6 flex items-center gap-2 border-b border-slate-100 pb-2 text-sm font-bold tracking-wider text-slate-900 uppercase"
-					>
-						<Settings class="h-4 w-4 text-blue-600" />
-						Site Settings
-					</h2>
-
-					<form
-						method="POST"
-						action="?/updateSettings"
-						class="space-y-4"
-						use:enhance={() => {
-							loading = true;
-							return async ({ update }) => {
-								loading = false;
-								await update();
-							};
-						}}
-					>
-						{#if form?.settingsSuccess}
-							<div
-								class="border-l-4 border-green-500 bg-green-50 p-3 text-xs font-bold text-green-700"
-							>
-								Settings updated successfully!
-							</div>
-						{/if}
-
-						{#if form?.settingsError}
-							<div class="border-l-4 border-red-500 bg-red-50 p-3 text-xs font-bold text-red-700">
-								{form.settingsError}
-							</div>
-						{/if}
-
-						<div>
-							<label class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
-								>Blog Name</label
-							>
-							<input
-								type="text"
-								name="blogName"
-								value={data.settings.blog_name || ''}
-								required
-								class="w-full border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-							/>
-							<p class="mt-1 text-[10px] text-slate-400">
-								This name will be used in the header and footer of the public site.
-							</p>
-						</div>
-
-						<div class="pt-2">
-							<button
-								type="submit"
-								disabled={loading}
-								class="flex items-center gap-2 bg-blue-600 px-4 py-2 text-xs font-bold tracking-wider text-white uppercase transition-colors hover:bg-blue-700 disabled:opacity-50"
-							>
-								{#if loading}
-									<span
-										class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"
-									></span>
-								{/if}
-								Update Settings
-							</button>
-						</div>
-					</form>
-				</div>
-			{/if}
 		</div>
 
 		<!-- Change Password -->

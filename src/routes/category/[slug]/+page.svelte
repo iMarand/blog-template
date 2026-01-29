@@ -2,10 +2,11 @@
 	let { data } = $props();
 	const category = $derived(data.category);
 	const posts = $derived(data.posts || []);
+	const blogName = $derived(data.blogName || 'ExtraMele');
 </script>
 
 <svelte:head>
-	<title>{category.name} - NewsWeek PRO</title>
+	<title>{category.name} - {blogName}</title>
 	<meta
 		name="description"
 		content={category.description || `Browse all stories in ${category.name}`}
@@ -35,7 +36,7 @@
 				>Category</span
 			>
 			<h1
-				class="my-6 bg-white/90 rounded-lg py-4 font-['Playfair_Display'] text-5xl font-black tracking-tighter text-[#222] italic drop-shadow-sm sm:text-7xl"
+				class="my-6 rounded-lg bg-white/90 py-4 font-['Playfair_Display'] text-5xl font-black tracking-tighter text-[#222] italic drop-shadow-sm sm:text-7xl"
 			>
 				{category.name}
 			</h1>
@@ -86,7 +87,7 @@
 
 							<a href="/blog/{post.slug}" class="mb-4 text-black no-underline">
 								<h2
-									class="font-['Playfair_Display'] text-2xl leading-tight font-black italic transition-colors group-hover:text-[#e31e24] sm:text-3xl"
+									class="line-clamp-3 font-['Playfair_Display'] text-2xl leading-tight font-black italic transition-colors group-hover:text-[#e31e24] sm:text-3xl"
 								>
 									{post.title}
 								</h2>
@@ -98,9 +99,14 @@
 
 							<div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-6">
 								<div class="flex items-center gap-3">
-									<div class="h-8 w-8 rounded-full bg-gray-200"></div>
+									<img
+										src={post.authorAvatar ||
+											`https://i.pravatar.cc/50?u=${post.authorName || 'staff'}`}
+										alt={post.authorName || 'Staff Writer'}
+										class="h-8 w-8 rounded-full object-cover"
+									/>
 									<span class="text-[10px] font-black tracking-wider text-gray-600 uppercase"
-										>Dan Bush</span
+										>{post.authorName || 'Staff Writer'}</span
 									>
 								</div>
 								<a

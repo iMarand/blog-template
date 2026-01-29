@@ -38,7 +38,6 @@
 <style>
 	:global(html),
 	:global(body) {
-		overflow-x: hidden;
 		height: auto;
 		min-height: 100vh;
 	}

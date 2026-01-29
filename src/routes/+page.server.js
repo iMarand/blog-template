@@ -50,6 +50,7 @@ export async function load() {
             isExclusive: schema.posts.isExclusive,
             publishedAt: schema.posts.publishedAt,
             authorName: schema.users.displayName,
+            authorAvatar: schema.users.avatarUrl,
             categoryName: schema.categories.name,
             categorySlug: schema.categories.slug
         })
