@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
+	import TurndownService from 'turndown';
 	import {
 		ArrowLeft,
 		Save,
@@ -16,7 +17,9 @@
 		Quote,
 		Heading1,
 		Trash2,
-		Heading2
+		Heading2,
+		FileCode,
+		FileText
 	} from 'lucide-svelte';
 
 	let { data, form } = $props();
@@ -29,8 +32,31 @@
 	let featuredImage = $state(form?.featuredImage ?? '');
 	let showPreview = $state(false);
 
+	// Editor mode: 'markdown' or 'html'
+	let editorMode = $state('markdown');
+
+	// Turndown instance for HTML to Markdown conversion
+	const turndownService = new TurndownService({
+		headingStyle: 'atx',
+		codeBlockStyle: 'fenced'
+	});
+
+	// Switch to HTML mode - convert markdown to HTML
+	function switchToHtml() {
+		if (editorMode === 'html') return;
+		content = marked(content || '');
+		editorMode = 'html';
+	}
+
+	// Switch to Markdown mode - convert HTML to Markdown
+	function switchToMarkdown() {
+		if (editorMode === 'markdown') return;
+		content = turndownService.turndown(content || '');
+		editorMode = 'markdown';
+	}
+
 	// Markdown preview
-	let preview = $derived(marked(content || ''));
+	let preview = $derived(editorMode === 'markdown' ? marked(content || '') : content);
 
 	async function handleUpload(file) {
 		const formData = new FormData();
@@ -159,16 +185,48 @@
 						class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2"
 					>
 						<div class="flex items-center gap-1">
-							{#each markdownButtons as btn}
+							<!-- Editor Mode Toggle -->
+							<div class="mr-2 flex items-center rounded-sm border border-slate-300 bg-white">
 								<button
 									type="button"
-									onclick={btn.action}
-									class="rounded-sm p-1.5 text-slate-600 transition-colors hover:bg-slate-200"
-									title={btn.title}
+									onclick={switchToMarkdown}
+									class="flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase transition-colors {editorMode ===
+									'markdown'
+										? 'bg-slate-800 text-white'
+										: 'text-slate-600 hover:bg-slate-100'}"
+									title="Markdown Mode"
 								>
-									<btn.icon class="h-4 w-4" />
+									<FileText class="h-3 w-3" />
+									MD
 								</button>
-							{/each}
+								<button
+									type="button"
+									onclick={switchToHtml}
+									class="flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase transition-colors {editorMode ===
+									'html'
+										? 'bg-slate-800 text-white'
+										: 'text-slate-600 hover:bg-slate-100'}"
+									title="HTML Mode"
+								>
+									<FileCode class="h-3 w-3" />
+									HTML
+								</button>
+							</div>
+
+							<!-- Markdown Toolbar (only visible in markdown mode) -->
+							{#if editorMode === 'markdown'}
+								<div class="mx-1 h-4 w-px bg-slate-300"></div>
+								{#each markdownButtons as btn}
+									<button
+										type="button"
+										onclick={btn.action}
+										class="rounded-sm p-1.5 text-slate-600 transition-colors hover:bg-slate-200"
+										title={btn.title}
+									>
+										<btn.icon class="h-4 w-4" />
+									</button>
+								{/each}
+							{/if}
 						</div>
 						<button
 							type="button"
@@ -204,7 +262,9 @@
 							ondragover={(e) => e.preventDefault()}
 							ondrop={onDrop}
 							class="min-h-[500px] w-full resize-y border-0 px-6 py-4 font-mono text-sm leading-relaxed text-slate-800 focus:ring-0"
-							placeholder="Write your post content in Markdown... (Drag and drop images here)"
+							placeholder={editorMode === 'markdown'
+								? 'Write your post content in Markdown... (Drag and drop images here)'
+								: 'Write or paste your HTML content here...'}
 						></textarea>
 					{/if}
 				</div>

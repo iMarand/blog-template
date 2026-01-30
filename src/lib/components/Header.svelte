@@ -1,6 +1,7 @@
 <script>
 	import { Menu, X, Search } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	let { categories = [], blogName = 'NewsWeek' } = $props();
 	let menuOpen = $state(false);
 	let searchOpen = $state(false);
@@ -76,7 +77,7 @@
 						{blogName}
 						<span
 							class="ml-1 font-[Roboto] text-[0.7rem] font-black tracking-tighter text-[#222] uppercase italic not-italic md:text-[0.9rem]"
-							>PRO</span
+							>Blog</span
 						>
 					</h1>
 				</a>
@@ -211,10 +212,10 @@
 					class="font-['Playfair_Display'] text-base font-black text-[#e31e24] italic md:text-2xl"
 				>
 					{blogName}
-					<!-- <span
+					<span
 						class="ml-0.5 hidden font-[Roboto] text-[0.6rem] font-black text-[#222] not-italic md:inline-block md:text-[0.7rem]"
-						>PRO</span
-					> -->
+						>Blog</span
+					>
 				</span>
 			</a>
 		</div>
@@ -222,45 +223,31 @@
 		<!-- Horizontal Scrollable Nav (Robust Alignment + Scroll Indicators) -->
 		<div class="scroll-container flex-1 overflow-x-auto {isSticky ? 'is-sticky' : 'is-normal'}">
 			<div class="flex min-w-full items-center">
-				<!-- Left Spacer: Dynamic growth to handle alignment -->
-				<div
-					class="flex-1 transition-all duration-500 {isSticky
-						? 'md:flex-grow-[1]'
-						: 'md:flex-grow-[1]'}"
-				></div>
-
 				<ul
-					class="m-0 flex items-center justify-center list-none w-full gap-3 p-0 px-5 md:px-5 py-1 font-bold whitespace-nowrap transition-all duration-500 md:gap-4"
+					class="m-0 flex w-full list-none items-center justify-start gap-3 p-0 py-1 pr-4 pl-4 font-bold whitespace-nowrap transition-all duration-500 md:gap-4 md:px-5"
 				>
 					{#each categories as cat, i}
-						<li class="text-center block">
+						<li class="block text-center">
 							<a
 								href="/category/{cat.slug}"
-								class="text-[11px] text-center border-red-400 font-bold tracking-wider text-black uppercase no-underline transition-colors hover:text-[#e31e24] md:text-[13px]"
-								>{cat.name}</a
+								class="border-red-400 text-center text-[11px] font-bold tracking-wider uppercase no-underline transition-colors md:text-[13px] {$page
+									.url.pathname === `/category/${cat.slug}`
+									? 'text-[#e31e24]'
+									: 'text-black hover:text-[#e31e24]'}">{cat.name}</a
 							>
 						</li>
 
 						{#if i != categories.length - 1}
-							<div class="flex justify-center items-center">
-								<li class="w-3 h-0.5 bg-red-500"></li>
+							<div class="flex items-center justify-center">
+								<li class="h-0.5 w-3 bg-red-500"></li>
 							</div>
-							{:else}
-							<div class="flex justify-center items-center">
-								<li class="w-3 h-0.5 bg-white/10"></li>
+						{:else}
+							<div class="flex items-center justify-center">
+								<li class="h-0.5 w-3 bg-white/10"></li>
 							</div>
-
 						{/if}
-
 					{/each}
 				</ul>
-
-				<!-- Right Spacer: Only grows when NOT sticky to keep it centered -->
-				<div
-					class="transition-all duration-500 {!isSticky
-						? 'flex-1 md:flex-grow-[1]'
-						: 'w-0 overflow-hidden opacity-0'}"
-				></div>
 			</div>
 		</div>
 	</div>
@@ -276,7 +263,7 @@
 		tabindex="0"
 	>
 		<div
-			class="absolute top-0 bottom-0 left-0 flex w-[85%] max-w-[320px] flex-col bg-white p-8 shadow-2xl"
+			class="absolute top-0 bottom-0 left-0 flex w-[85%] max-w-[320px] flex-col bg-white p-6 shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="button"
@@ -284,7 +271,7 @@
 		>
 			<div class="mb-10 flex items-center justify-between">
 				<h2 class="font-['Playfair_Display'] text-2xl font-black text-[#e31e24] italic">
-					{blogName} <span class="text-xs font-black text-black not-italic">PRO</span>
+					{blogName} <span class="text-xs font-black text-black not-italic">Blog</span>
 				</h2>
 				<button
 					onclick={() => (menuOpen = false)}
@@ -294,32 +281,65 @@
 				</button>
 			</div>
 
+			<!-- Search Button -->
+			<button
+				class="mb-6 flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-gray-500 transition-colors hover:border-[#e31e24] hover:bg-white hover:text-[#e31e24]"
+				onclick={() => {
+					menuOpen = false;
+					searchOpen = true;
+				}}
+			>
+				<Search class="h-5 w-5" />
+				<span class="text-sm font-medium">Search articles...</span>
+			</button>
+
 			<div class="thin-scrollbar flex-1 overflow-y-auto pr-2">
-				<nav class="flex flex-col gap-5">
+				<nav class="flex flex-col gap-3">
 					<a
 						href="/"
-						class="border-b border-gray-100 pb-2 text-xl font-black text-black no-underline hover:text-[#e31e24]"
-						>Home</a
+						class="border-b border-gray-100 pb-2 text-xl font-black no-underline transition-colors {$page
+							.url.pathname === '/'
+							? 'text-[#e31e24]'
+							: 'text-black hover:text-[#e31e24]'}"
+						onclick={() => (menuOpen = false)}>Home</a
 					>
-					{#each categories as cat}
-						<a
-							href="/category/{cat.slug}"
-							class="text-base font-bold text-gray-700 no-underline transition-colors hover:text-[#e31e24]"
-							onclick={() => (menuOpen = false)}
-						>
-							{cat.name}
-						</a>
+					{#each categories as cat, i}
+						<div class="flex items-center gap-3">
+							<div class="h-0.5 w-3 bg-red-500"></div>
+							<a
+								href="/category/{cat.slug}"
+								class="text-base font-bold no-underline transition-colors {$page.url.pathname ===
+								`/category/${cat.slug}`
+									? 'text-[#e31e24]'
+									: 'text-gray-700 hover:text-[#e31e24]'}"
+								onclick={() => (menuOpen = false)}
+							>
+								{cat.name}
+							</a>
+						</div>
 					{/each}
 				</nav>
 			</div>
 
-			<div class="mt-auto border-t border-gray-100 pt-10">
-				<button
-					class="mb-6 w-full cursor-pointer rounded-sm bg-[#e31e24] py-4 font-black text-white uppercase transition-colors hover:bg-black"
-					>Subscribe</button
-				>
-				<div class="flex justify-center gap-8 text-xl font-bold text-gray-400">
-					<span>f</span><span>📸</span><span>𝕏</span>
+			<div class="mt-auto border-t border-gray-100 pt-6">
+				<div class="flex flex-wrap justify-center gap-4 text-xs font-medium text-gray-500">
+					<a
+						href="/about"
+						class="no-underline hover:text-[#e31e24]"
+						onclick={() => (menuOpen = false)}>About</a
+					>
+					<span class="text-gray-300">|</span>
+					<a
+						href="/contact"
+						class="no-underline hover:text-[#e31e24]"
+						onclick={() => (menuOpen = false)}>Contact</a
+					>
+					<span class="text-gray-300">|</span>
+					<a
+						href="/privacy"
+						class="no-underline hover:text-[#e31e24]"
+						onclick={() => (menuOpen = false)}>Privacy</a
+					>
 				</div>
 			</div>
 		</div>
@@ -357,26 +377,35 @@
 	}
 
 	.scroll-container.is-normal {
-		mask-image: linear-gradient(
-			to right,
-			transparent,
-			black 15px,
-			black calc(100% - 15px),
-			transparent
-		);
-		-webkit-mask-image: linear-gradient(
-			to right,
-			transparent,
-			black 15px,
-			black calc(100% - 15px),
-			transparent
-		);
+		/* Mobile non-sticky: no left fade so first item is visible, fade only on right */
+		mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
+	}
+
+	@media (min-width: 768px) {
+		.scroll-container.is-normal {
+			/* Desktop non-sticky: symmetric small fades */
+			mask-image: linear-gradient(
+				to right,
+				transparent,
+				black 15px,
+				black calc(100% - 15px),
+				transparent
+			);
+			-webkit-mask-image: linear-gradient(
+				to right,
+				transparent,
+				black 15px,
+				black calc(100% - 15px),
+				transparent
+			);
+		}
 	}
 
 	.scroll-container.is-sticky {
 		/* Mobile sticky: no left fade, fade only on right */
-		mask-image: linear-gradient(to right, black calc(100% - 15px), transparent);
-		-webkit-mask-image: linear-gradient(to right, black calc(100% - 15px), transparent);
+		mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
 	}
 
 	@media (min-width: 768px) {
