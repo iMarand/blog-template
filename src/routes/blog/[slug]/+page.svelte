@@ -207,7 +207,7 @@
 			</div>
 
 			<!-- Author Bio -->
-			<div class="sm:row mt-16 flex flex-col gap-6 border-t border-gray-100 pt-10 md:items-center">
+			<div class="sm:row mt-10 flex flex-col gap-6 border-t border-gray-100 pt-10 md:items-center">
 				<div class="flex items-center gap-6">
 					<img
 						src={post.authorAvatar || `https://i.pravatar.cc/150?u=${post.authorName || 'staff'}`}
@@ -224,7 +224,7 @@
 				<div class="text-sm leading-relaxed text-gray-600 sm:hidden">
 					{post.authorBio || `Staff Writer at ${blogName}.`}
 				</div>
-				<div class="mt-4 flex gap-6 text-lg text-gray-400 sm:mt-0">
+				<!-- <div class="mt-4 flex gap-6 text-lg text-gray-400 sm:mt-0">
 					{#each socialLinks as link}
 						<a
 							href={link.href}
@@ -235,7 +235,7 @@
 							{link.icon}
 						</a>
 					{/each}
-				</div>
+				</div> -->
 			</div>
 
 			<!-- Comments Section -->

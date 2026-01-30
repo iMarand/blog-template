@@ -18,8 +18,13 @@ marked.setOptions({
     gfm: true
 });
 
-export async function load({ params }) {
+export async function load({ params, setHeaders }) {
     const { slug } = params;
+
+    // Disable caching for individual posts to ensure author/comment updates are seen immediately
+    setHeaders({
+        'cache-control': 'max-age=0, s-maxage=60' // Cache for 1 min on CDN, 0 on browser
+    });
 
     // Get post metadata from database
     const post = db
