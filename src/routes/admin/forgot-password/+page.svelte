@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Reset Password - Plexify Admin</title>
+	<title>Reset Password - Admin Panel</title>
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-[#f9f9f9] p-4 font-sans">
@@ -18,7 +18,7 @@
 				<h1
 					class="text-5xl font-extrabold tracking-tighter text-slate-900 transition-transform group-hover:scale-105"
 				>
-					Plexify<span class="text-blue-600">.</span>
+					Admin Panel<span class="text-blue-600">.</span>
 				</h1>
 			</a>
 			<p class="mt-4 text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">

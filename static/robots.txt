@@ -1,3 +1,10 @@
-# allow crawling everything by default
+# ExtraMele Blog Robots.txt
+
 User-agent: *
-Disallow:
+Allow: /
+
+
+Sitemap: https://extramele.blog/sitemap.xml
+
+Disallow: /admin/
+Disallow: /api/
