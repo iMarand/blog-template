@@ -65,7 +65,7 @@ export function load({ params, locals }) {
     }
 
     // Fetch categories for this post
-    const postCats = db
+    let postCats = db
         .select({
             name: schema.categories.name
         })
@@ -74,9 +74,26 @@ export function load({ params, locals }) {
         .where(eq(schema.postCategories.postId, postId))
         .all();
 
+    // Fallback: Check direct categoryId on the post if no many-to-many records exist
+    if (postCats.length === 0 && post.categoryId) {
+        const primaryCat = db
+            .select({ name: schema.categories.name })
+            .from(schema.categories)
+            .where(eq(schema.categories.id, post.categoryId))
+            .get();
+
+        if (primaryCat) {
+            postCats = [primaryCat];
+        }
+    }
+
     let categoryLabel = postCats.map(c => c.name).join(', ');
     if (post.isExclusive) {
-        categoryLabel = categoryLabel ? `${categoryLabel}, Exclusive` : 'Exclusive';
+        // Avoid duplicating "Exclusive" if it's already a category
+        const labels = new Set(postCats.map(c => c.name));
+        if (!labels.has('Exclusive')) {
+            categoryLabel = categoryLabel ? `${categoryLabel}, Exclusive` : 'Exclusive';
+        }
     }
 
     // Read content from filesystem

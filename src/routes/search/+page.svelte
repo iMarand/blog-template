@@ -80,9 +80,14 @@
 
 							<div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-6">
 								<div class="flex items-center gap-3">
-									<div class="h-8 w-8 rounded-full bg-gray-200"></div>
+									<img
+										src={post.authorAvatar ||
+											`https://i.pravatar.cc/50?u=${post.authorName || 'staff'}`}
+										alt={post.authorName || 'Staff Writer'}
+										class="h-8 w-8 rounded-full object-cover"
+									/>
 									<span class="text-[10px] font-black tracking-wider text-gray-600 uppercase"
-										>Dan Bush</span
+										>{post.authorName || 'Staff Writer'}</span
 									>
 								</div>
 								<a

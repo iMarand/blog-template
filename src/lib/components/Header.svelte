@@ -40,6 +40,17 @@
 			liveResults = [];
 		}
 	}
+
+	let isSticky = $state(false);
+
+	$effect(() => {
+		const handleScroll = () => {
+			// Change 100 to the height of your main header
+			isSticky = window.scrollY > 120;
+		};
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
 </script>
 
 <header class="relative border-b border-gray-200 pt-5 font-[Roboto]">
@@ -176,22 +187,81 @@
 
 <!-- Sticky Navigation -->
 <nav class="sticky-nav">
-	<div class="mx-auto max-w-[1300px] px-5">
-		<!-- Horizontal Scrollable Nav -->
-		<div class="no-scrollbar overflow-x-auto">
-			<ul
-				class="m-0 flex list-none justify-start gap-6 p-0 py-1 whitespace-nowrap md:justify-center"
+	<div class="mx-auto flex max-w-[1300px] items-center px-5">
+		<!-- Sticky Leading (Left) -->
+		<div
+			class="flex flex-shrink-0 items-center gap-2 transition-all duration-300 md:gap-3 {isSticky
+				? 'translate-x-0 opacity-100 md:w-[240px]'
+				: 'pointer-events-none w-0 -translate-x-4 overflow-hidden opacity-0'}"
+		>
+			<!-- Menu Button -->
+			<button
+				class="flex cursor-pointer items-center justify-center border-none bg-transparent p-0 transition-colors hover:text-[#e31e24]"
+				onclick={() => (menuOpen = !menuOpen)}
+				aria-label="Toggle Menu"
 			>
-				{#each categories as cat}
-					<li>
-						<a
-							href="/category/{cat.slug}"
-							class="text-[11px] font-bold tracking-wider text-black uppercase no-underline transition-colors hover:text-[#e31e24] md:text-sm"
-							>{cat.name}</a
-						>
-					</li>
-				{/each}
-			</ul>
+				<Menu class="h-5 w-5 md:h-6 md:w-6" />
+			</button>
+
+			<a
+				href="/"
+				class="hidden flex-shrink-0 no-underline transition-opacity hover:opacity-80 md:block"
+			>
+				<span
+					class="font-['Playfair_Display'] text-base font-black text-[#e31e24] italic md:text-2xl"
+				>
+					{blogName}
+					<!-- <span
+						class="ml-0.5 hidden font-[Roboto] text-[0.6rem] font-black text-[#222] not-italic md:inline-block md:text-[0.7rem]"
+						>PRO</span
+					> -->
+				</span>
+			</a>
+		</div>
+
+		<!-- Horizontal Scrollable Nav (Robust Alignment + Scroll Indicators) -->
+		<div class="scroll-container flex-1 overflow-x-auto {isSticky ? 'is-sticky' : 'is-normal'}">
+			<div class="flex min-w-full items-center">
+				<!-- Left Spacer: Dynamic growth to handle alignment -->
+				<div
+					class="flex-1 transition-all duration-500 {isSticky
+						? 'md:flex-grow-[1]'
+						: 'md:flex-grow-[1]'}"
+				></div>
+
+				<ul
+					class="m-0 flex items-center justify-center list-none w-full gap-3 p-0 px-5 md:px-5 py-1 font-bold whitespace-nowrap transition-all duration-500 md:gap-4"
+				>
+					{#each categories as cat, i}
+						<li class="text-center block">
+							<a
+								href="/category/{cat.slug}"
+								class="text-[11px] text-center border-red-400 font-bold tracking-wider text-black uppercase no-underline transition-colors hover:text-[#e31e24] md:text-[13px]"
+								>{cat.name}</a
+							>
+						</li>
+
+						{#if i != categories.length - 1}
+							<div class="flex justify-center items-center">
+								<li class="w-3 h-0.5 bg-red-500"></li>
+							</div>
+							{:else}
+							<div class="flex justify-center items-center">
+								<li class="w-3 h-0.5 bg-white/10"></li>
+							</div>
+
+						{/if}
+
+					{/each}
+				</ul>
+
+				<!-- Right Spacer: Only grows when NOT sticky to keep it centered -->
+				<div
+					class="transition-all duration-500 {!isSticky
+						? 'flex-1 md:flex-grow-[1]'
+						: 'w-0 overflow-hidden opacity-0'}"
+				></div>
+			</div>
 		</div>
 	</div>
 </nav>
@@ -278,6 +348,59 @@
 	.no-scrollbar {
 		-ms-overflow-style: none;
 		scrollbar-width: none;
+	}
+
+	/* Scroll Indicators (Edge Fades) */
+	.scroll-container {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.scroll-container.is-normal {
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			black 15px,
+			black calc(100% - 15px),
+			transparent
+		);
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent,
+			black 15px,
+			black calc(100% - 15px),
+			transparent
+		);
+	}
+
+	.scroll-container.is-sticky {
+		/* Mobile sticky: no left fade, fade only on right */
+		mask-image: linear-gradient(to right, black calc(100% - 15px), transparent);
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 15px), transparent);
+	}
+
+	@media (min-width: 768px) {
+		.scroll-container.is-sticky {
+			/* Desktop sticky: symmetric small fades */
+			mask-image: linear-gradient(
+				to right,
+				transparent,
+				black 15px,
+				black calc(100% - 15px),
+				transparent
+			);
+			-webkit-mask-image: linear-gradient(
+				to right,
+				transparent,
+				black 15px,
+				black calc(100% - 15px),
+				transparent
+			);
+		}
+	}
+
+	.scroll-container::-webkit-scrollbar {
+		display: none;
 	}
 
 	/* Thin Scrollbar for Mobile Menu */

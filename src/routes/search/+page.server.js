@@ -23,10 +23,13 @@ export async function load({ url }) {
             featuredImage: schema.posts.featuredImage,
             publishedAt: schema.posts.publishedAt,
             categoryName: schema.categories.name,
-            categorySlug: schema.categories.slug
+            categorySlug: schema.categories.slug,
+            authorName: schema.users.displayName,
+            authorAvatar: schema.users.avatarUrl
         })
         .from(schema.posts)
         .leftJoin(schema.categories, eq(schema.posts.categoryId, schema.categories.id))
+        .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
         .where(
             and(
                 eq(schema.posts.published, 1),

@@ -13,40 +13,38 @@
 	let message = $state('');
 
 	// Social links with dynamic values
-	const socialLinks = $derived(
-		[
-			{
-				name: 'Facebook',
-				icon: Facebook,
-				bg: 'bg-[#3b5999]',
-				href: siteSettings.social_facebook
-			},
-			{
-				name: 'Twitter',
-				icon: Twitter,
-				bg: 'bg-black',
-				href: siteSettings.social_twitter
-			},
-			{
-				name: 'YouTube',
-				icon: Youtube,
-				bg: 'bg-[#ff0000]',
-				href: siteSettings.social_youtube
-			},
-			{
-				name: 'Instagram',
-				icon: Instagram,
-				bg: 'bg-[#e1306c]',
-				href: siteSettings.social_instagram
-			},
-			{
-				name: 'TikTok',
-				icon: Share2,
-				bg: 'bg-black',
-				href: siteSettings.social_tiktok
-			}
-		].filter((link) => link.href)
-	);
+	const socialLinks = $derived([
+		{
+			name: 'Facebook',
+			icon: Facebook,
+			bg: 'bg-[#3b5999]',
+			href: siteSettings.social_facebook
+		},
+		{
+			name: 'Twitter',
+			icon: Twitter,
+			bg: 'bg-black',
+			href: siteSettings.social_twitter
+		},
+		{
+			name: 'YouTube',
+			icon: Youtube,
+			bg: 'bg-[#ff0000]',
+			href: siteSettings.social_youtube
+		},
+		{
+			name: 'Instagram',
+			icon: Instagram,
+			bg: 'bg-[#e1306c]',
+			href: siteSettings.social_instagram
+		},
+		{
+			name: 'TikTok',
+			icon: Share2,
+			bg: 'bg-black',
+			href: siteSettings.social_tiktok
+		}
+	]);
 
 	async function subscribe(e) {
 		e.preventDefault();
@@ -117,20 +115,27 @@
 					{siteSettings.blog_description ||
 						`${blogName} PRO is your ultimate source for the latest in technology, lifestyle, and global trends. We bring you curated stories that matter.`}
 				</p>
-				{#if socialLinks.length > 0}
-					<div class="flex gap-2">
-						{#each socialLinks as social}
+				<div class="flex gap-2">
+					{#each socialLinks as social}
+						{#if social.href}
 							<a
 								href={social.href}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="{social.bg} group flex h-10 w-10 items-center justify-center rounded-sm text-white transition-transform hover:-translate-y-1"
+								class="{social.bg} group flex h-10 w-10 items-center justify-center rounded-sm text-white transition-transform"
 							>
 								<social.icon class="h-4 w-4 transition-transform group-hover:scale-110" />
 							</a>
-						{/each}
-					</div>
-				{/if}
+						{:else}
+							<div
+								class="{social.bg} pointer-events-none flex h-10 w-10 cursor-default items-center justify-center rounded-sm text-white opacity-90"
+								aria-hidden="true"
+							>
+								<social.icon class="h-4 w-4" />
+							</div>
+						{/if}
+					{/each}
+				</div>
 			</div>
 
 			<!-- Company -->

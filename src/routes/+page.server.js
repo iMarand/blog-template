@@ -59,7 +59,7 @@ export async function load() {
         .leftJoin(schema.users, eq(schema.posts.authorId, schema.users.id))
         .where(eq(schema.posts.published, 1))
         .orderBy(desc(schema.posts.publishedAt))
-        .limit(60)
+        .limit(100)
         .all();
 
     const enhancedPosts = allPublished.map(post => {
@@ -119,6 +119,14 @@ export async function load() {
         .filter(p => p.isExclusive && !gridIds.has(p.id))
         .slice(0, 4);
 
+    // New Section: Two Large Exclusive Posts
+    const bottomIds = new Set(breakingBottomList.map(p => p.id));
+    const breakingLargeFeatured = enhancedPosts
+        .filter(p => p.isExclusive && !gridIds.has(p.id) && !bottomIds.has(p.id))
+        .slice(0, 2);
+
+
+
     // If breakingGrid or breakingBottomList are still empty (no isExclusive posts at all),
     // maybe fill with latest news but that might defeat the "Exclusive" purpose.
     // However, the user said they HAVE Exclusive content.
@@ -129,6 +137,8 @@ export async function load() {
 
     const recentSidebarFeatured = getUniquePosts(enhancedPosts, 1)[0] || enhancedPosts[1];
     const recentSidebarList = getUniquePosts(enhancedPosts, 5);
+
+
 
     // Popular Posts Slices
     const popularVisual = popularPosts.slice(0, 2);
@@ -155,6 +165,7 @@ export async function load() {
         popularList,
         breakingGrid,
         breakingBottomList,
+        breakingLargeFeatured,
         recentFeatured,
         recentGrid,
         recentSidebarFeatured,

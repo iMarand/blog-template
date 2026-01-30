@@ -31,6 +31,7 @@
 			latestNews={data.latestPosts}
 			footerPages={data.footerPages}
 			blogName={data.blogName}
+			siteSettings={data.siteSettings}
 		/>
 	{/if}
 </div>

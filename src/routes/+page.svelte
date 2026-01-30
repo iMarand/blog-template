@@ -1,8 +1,33 @@
 <script>
+	import { Facebook, Twitter, Youtube, Instagram, Share2 } from 'lucide-svelte';
+
 	let { data } = $props();
 
 	// --- STATE & DATA ---
 	let menuOpen = $state(false);
+	const siteSettings = $derived(data.siteSettings || {});
+
+	const socialLinks = $derived(
+		[
+			{
+				name: 'Facebook',
+				icon: Facebook,
+				href: siteSettings.social_facebook
+			},
+			{
+				name: 'Instagram',
+				icon: Instagram,
+				href: siteSettings.social_instagram
+			},
+			{
+				name: 'Twitter',
+				icon: Twitter,
+				href: siteSettings.social_twitter
+			}
+		]
+			.filter((link) => link.href)
+			.slice(0, 3)
+	);
 
 	const categories = $derived((data.categories || []).map((c) => c.name));
 	const categoryList = $derived(data.categories || []);
@@ -61,6 +86,13 @@
 			title: p.title,
 			slug: p.slug,
 			exclusive: p.isExclusive,
+			date: p.publishedAt
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric'
+					})
+				: '',
 			img: p.featuredImage || `https://picsum.photos/seed/${p.slug}/400/500`
 		}))
 	);
@@ -71,7 +103,32 @@
 			title: p.title,
 			slug: p.slug,
 			exclusive: p.isExclusive,
+			date: p.publishedAt
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric'
+					})
+				: '',
 			img: p.featuredImage || `https://picsum.photos/seed/${p.slug}/100/80`
+		}))
+	);
+
+	const breakingLargeFeatured = $derived(
+		(data.breakingLargeFeatured || []).map((p) => ({
+			cat: p.categoryName || 'GENERAL',
+			title: p.title,
+			slug: p.slug,
+			date: p.publishedAt
+				? new Date(p.publishedAt * 1000).toLocaleDateString('en-US', {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric'
+					})
+				: '',
+			excerpt: p.excerpt,
+			exclusive: p.isExclusive,
+			img: p.featuredImage || `https://picsum.photos/seed/${p.slug}/600/400`
 		}))
 	);
 
@@ -142,7 +199,7 @@
 	<div class="mx-auto mb-10 max-w-[1300px] border-b border-gray-200 py-3 sm:py-5">
 		<div class="flex items-center px-2 sm:px-5">
 			<button
-				class="mx-1 hidden h-[30px] w-[30px] flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-gray-200 text-gray-400 transition-colors hover:bg-gray-300 sm:mx-2 sm:flex"
+				class="mx-1 hidden h-[30px] w-[30px] flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-gray-200/10 text-gray-400 transition-colors hover:bg-gray-300 sm:mx-2 sm:flex"
 				>‹</button
 			>
 			<div class="no-scrollbar flex-1 overflow-x-auto">
@@ -167,7 +224,7 @@
 				</div>
 			</div>
 			<button
-				class="mx-1 hidden h-[30px] w-[30px] flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-gray-200 text-gray-400 transition-colors hover:bg-gray-300 sm:mx-2 sm:flex"
+				class="mx-1 hidden h-[30px] w-[30px] flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-gray-200/10 text-gray-400 transition-colors hover:bg-gray-300 sm:mx-2 sm:flex"
 				>›</button
 			>
 		</div>
@@ -191,7 +248,7 @@
 		<section class="order-1 lg:order-2 lg:col-span-1">
 			<a
 				href="/blog/{heroFeatured.slug}"
-				class="group relative block h-[400px] overflow-hidden rounded-lg sm:h-[500px] lg:h-full lg:min-h-[580px]"
+				class="group relative block h-[400px] overflow-hidden rounded-lg sm:h-[500px] lg:h-full lg:max-h-[750px]"
 			>
 				<img
 					src={heroFeatured.featuredImage ||
@@ -205,6 +262,15 @@
 					<span class="bg-[#e31e24] px-2 py-1 text-[10px] font-extrabold uppercase"
 						>{heroFeatured.categoryName || 'GENERAL'}</span
 					>
+					<span class="ml-2 text-[10px] font-bold tracking-wider text-gray-300 uppercase">
+						{heroFeatured.publishedAt
+							? new Date(heroFeatured.publishedAt * 1000).toLocaleDateString('en-US', {
+									month: 'long',
+									day: 'numeric',
+									year: 'numeric'
+								})
+							: ''}
+					</span>
 					<h2
 						class="my-3 font-['Playfair_Display'] text-2xl leading-tight font-black italic sm:my-4 sm:text-4xl lg:text-[2.8rem]"
 					>
@@ -244,7 +310,7 @@
 					</div>
 				{/each}
 			</div>
-			<div class="mt-6 flex gap-1">
+			<!-- <div class="mt-6 flex gap-1">
 				<button
 					class="cursor-pointer border border-gray-200 bg-none px-3 py-1 text-gray-400 transition-colors hover:border-black hover:text-black"
 					>←</button
@@ -253,7 +319,7 @@
 					class="cursor-pointer border border-gray-200 bg-none px-3 py-1 text-gray-400 transition-colors hover:border-black hover:text-black"
 					>→</button
 				>
-			</div>
+			</div> -->
 		</aside>
 
 		<!-- RIGHT COLUMN: Popular -->
@@ -266,7 +332,7 @@
 				{#each popularVisual as item}
 					<div class="group">
 						<a href="/blog/{item.slug}" class="relative mb-3 block overflow-hidden rounded-sm">
-							<div class="aspect-[3/4] w-full">
+							<div class="aspect-[4/4] w-full">
 								<img
 									src={item.featuredImage || `https://picsum.photos/seed/${item.slug}/400/300`}
 									alt={item.title}
@@ -275,9 +341,20 @@
 							</div>
 						</a>
 						<div>
-							<span class="mb-1 block text-[10px] font-bold text-[#e31e24] uppercase"
-								>{item.categoryName || 'GENERAL'}</span
-							>
+							<div class="mb-1 flex items-center gap-2">
+								<span class="block text-[10px] font-bold text-[#e31e24] uppercase"
+									>{item.categoryName || 'GENERAL'}</span
+								>
+								<span class="text-[9px] font-bold text-gray-400 uppercase"
+									>{item.publishedAt
+										? new Date(item.publishedAt * 1000).toLocaleDateString('en-US', {
+												month: 'long',
+												day: 'numeric',
+												year: 'numeric'
+											})
+										: ''}</span
+								>
+							</div>
 							<a href="/blog/{item.slug}" class="no-underline">
 								<h4
 									class="m-0 text-base leading-tight font-black text-black transition-colors group-hover:text-[#e31e24]"
@@ -326,10 +403,16 @@
 				>
 					For even more exclusive content!
 				</h2>
-				<div class="flex gap-6 text-xl font-bold text-gray-400">
-					<span class="cursor-pointer hover:text-[#e31e24]">f</span>
-					<span class="cursor-pointer hover:text-[#e31e24]">📸</span>
-					<span class="cursor-pointer hover:text-[#e31e24]">𝕏</span>
+				<div class="flex gap-4 text-xl font-bold text-gray-400">
+					{#each socialLinks as social}
+						<a
+							href={social.href}
+							class="group cursor-pointer text-gray-400 transition-colors hover:text-[#e31e24]"
+							target="_blank"
+						>
+							<social.icon class="h-5 w-5 transition-transform group-hover:scale-110" />
+						</a>
+					{/each}
 				</div>
 			</div>
 
@@ -343,7 +426,7 @@
 							<div class="absolute top-4 left-4 z-10 flex flex-col">
 								<span
 									class="bg-[#e31e24] px-2 py-1 text-[10px] font-black text-white uppercase italic shadow-lg"
-									>Breaking News</span
+									>Latest Exclusive</span
 								>
 							</div>
 						{/if}
@@ -362,6 +445,9 @@
 							<h4 class="m-0 text-lg leading-tight font-black text-white group-hover:underline">
 								{item.title}
 							</h4>
+							<span class="mt-1 block text-[9px] font-bold text-gray-300 uppercase"
+								>{item.date}</span
+							>
 						</div>
 					</a>
 				{/each}
@@ -380,7 +466,10 @@
 							>
 								{post.title}
 							</h5>
-							<span class="text-[9px] font-black text-[#e31e24] uppercase">{post.cat}</span>
+							<div class="flex items-center gap-2">
+								<span class="text-[9px] font-black text-[#e31e24] uppercase">{post.cat}</span>
+								<span class="text-[9px] font-bold text-gray-400 uppercase">{post.date}</span>
+							</div>
 						</div>
 						<div class="h-[70px] w-[85px] flex-shrink-0 overflow-hidden rounded-sm">
 							<img
@@ -392,11 +481,54 @@
 					</a>
 				{/each}
 			</div>
+
+			<!-- Large Exclusive Grid -->
+			{#if breakingLargeFeatured.length > 0}
+				<div class="mt-5 grid grid-cols-1 gap-10 pt-8 lg:grid-cols-2">
+					{#each breakingLargeFeatured as post}
+						<div class="group flex flex-col gap-4 sm:flex-row">
+							<a
+								href="/blog/{post.slug}"
+								class="relative block flex-shrink-0 overflow-hidden rounded-lg sm:w-5/12"
+							>
+								<div class="aspect-[4/3] w-full">
+									<img
+										src={post.img}
+										alt={post.title}
+										class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+									/>
+								</div>
+								{#if post.exclusive}
+									<div class="absolute top-2 left-2">
+										{@render exclusiveBadge()}
+									</div>
+								{/if}
+							</a>
+							<div class="flex flex-col justify-center">
+								<div class="mb-2 flex items-center gap-2">
+									<span class="text-[9px] font-black text-[#e31e24] uppercase">{post.cat}</span>
+									<span class="text-[9px] font-bold text-gray-400 uppercase">{post.date}</span>
+								</div>
+								<a href="/blog/{post.slug}" class="text-black no-underline">
+									<h3
+										class="m-0 mb-2 font-['Playfair_Display'] text-xl leading-tight font-black italic transition-colors group-hover:text-[#e31e24]"
+									>
+										{post.title}
+									</h3>
+								</a>
+								<p class="m-0 line-clamp-3 text-xs leading-relaxed text-gray-600">
+									{post.excerpt || ''}
+								</p>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 
-	<!-- RECENT POSTS SECTION -->
-	<section class="relative mx-auto max-w-[1300px] overflow-hidden px-5 py-24">
+	<!-- OTHER POSTS SECTION -->
+	<section class="relative mx-auto max-w-[1300px] overflow-hidden px-5 py-10">
 		<div
 			class="pointer-events-none absolute top-10 left-0 -z-10 text-[6rem] font-black tracking-[-10px] opacity-[0.03] select-none sm:text-[10rem]"
 		>
@@ -404,7 +536,7 @@
 		</div>
 
 		<div class="mb-16 flex flex-col items-center">
-			<h2 class="text-4xl font-black tracking-tighter uppercase sm:text-5xl">Recent posts</h2>
+			<h2 class="text-4xl font-black tracking-tighter uppercase sm:text-5xl">Other posts</h2>
 			<div class="mt-4 h-1.5 w-20 bg-[#e31e24]"></div>
 		</div>
 
@@ -432,7 +564,7 @@
 							<div class="h-1 w-1 rounded-full bg-gray-300"></div>
 							<span class="text-[10px] font-bold tracking-wider text-gray-500 uppercase"
 								>{recentFeatured.publishedAt
-									? new Date(recentFeatured.publishedAt).toLocaleDateString('en-US', {
+									? new Date(recentFeatured.publishedAt * 1000).toLocaleDateString('en-US', {
 											month: 'long',
 											day: 'numeric',
 											year: 'numeric'

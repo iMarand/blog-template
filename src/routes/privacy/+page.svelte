@@ -148,7 +148,7 @@
 			<!-- Sidebar -->
 			<aside class="space-y-12 lg:col-span-4 lg:pl-6">
 				<!-- Follow Widget -->
-				<div class="flex flex-col">
+				<div class="hidden flex-col">
 					<h2
 						class="mb-6 flex items-center justify-between border-l-4 border-black bg-gray-50 px-4 py-3 text-sm font-bold tracking-wider text-[#222] uppercase"
 					>

@@ -23,35 +23,35 @@
 			{
 				name: 'Facebook',
 				icon: Facebook,
-				color: 'bg-[#3b5999]',
+				bg: 'bg-[#3b5999]',
 				label: 'Facebook',
 				href: settings.social_facebook
 			},
 			{
 				name: 'Twitter',
 				icon: Twitter,
-				color: 'bg-black',
+				bg: 'bg-black',
 				label: 'Twitter',
 				href: settings.social_twitter
 			},
 			{
 				name: 'YouTube',
 				icon: Youtube,
-				color: 'bg-[#cd201f]',
+				bg: 'bg-[#ff0000]',
 				label: 'YouTube',
 				href: settings.social_youtube
 			},
 			{
 				name: 'Instagram',
 				icon: Instagram,
-				color: 'bg-[#e4405f]',
+				bg: 'bg-[#e1306c]',
 				label: 'Instagram',
 				href: settings.social_instagram
 			},
 			{
 				name: 'TikTok',
 				icon: Share2,
-				color: 'bg-black',
+				bg: 'bg-black',
 				label: 'TikTok',
 				href: settings.social_tiktok
 			}
@@ -242,10 +242,10 @@
 								href={social.href}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="{social.color} flex items-center justify-between px-3 py-2 text-white transition-opacity hover:opacity-90"
+								class="{social.bg} flex items-center justify-between px-3 py-2 text-white transition-opacity hover:opacity-90"
 							>
 								<div class="flex items-center gap-2">
-									<social.icon class="h-4 w-4 fill-current" /><span
+									<social.icon class="h-4 w-4 transition-transform group-hover:scale-110" /><span
 										class="text-[10px] font-bold tracking-wider uppercase">{social.label}</span
 									>
 								</div>
