@@ -336,6 +336,7 @@
 								<img
 									src={item.featuredImage || `https://picsum.photos/seed/${item.slug}/400/300`}
 									alt={item.title}
+									loading="lazy"
 									class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
 								/>
 							</div>
@@ -433,6 +434,7 @@
 						<img
 							src={item.img}
 							alt={item.title}
+							loading="lazy"
 							class="h-full w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-110"
 						/>
 						<div
@@ -475,6 +477,7 @@
 							<img
 								src={post.img}
 								alt=""
+								loading="lazy"
 								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 							/>
 						</div>
@@ -495,6 +498,7 @@
 									<img
 										src={post.img}
 										alt={post.title}
+										loading="lazy"
 										class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
 									/>
 								</div>
@@ -549,6 +553,7 @@
 							src={recentFeatured.featuredImage ||
 								`https://picsum.photos/seed/${recentFeatured.slug}/600/400`}
 							alt=""
+							loading="lazy"
 							class="h-[300px] w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-105"
 						/>
 						<span
@@ -587,6 +592,7 @@
 								src={recentFeatured.authorAvatar ||
 									`https://i.pravatar.cc/50?u=${recentFeatured.authorName || 'staff'}`}
 								alt={recentFeatured.authorName || 'Staff Writer'}
+								loading="lazy"
 								class="h-8 w-8 rounded-full object-cover"
 							/>
 							<span class="text-xs font-black uppercase"
@@ -607,6 +613,7 @@
 								<img
 									src={post.featuredImage || `https://picsum.photos/seed/${post.slug}/400/300`}
 									alt=""
+									loading="lazy"
 									class="h-full w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-110"
 								/>
 								<span
@@ -646,6 +653,7 @@
 								src={recentSidebarFeatured.featuredImage ||
 									`https://picsum.photos/seed/${recentSidebarFeatured.slug}/400/500`}
 								alt=""
+								loading="lazy"
 								class="h-full w-full rounded-lg object-cover transition-transform duration-700 group-hover:scale-105"
 							/>
 						</div>

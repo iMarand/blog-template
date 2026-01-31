@@ -61,6 +61,7 @@
 							<img
 								src={post.featuredImage || `https://picsum.photos/seed/${post.slug}/600/450`}
 								alt={post.title}
+								loading="lazy"
 								class="h-full w-full rounded-xl object-cover transition-transform duration-700 group-hover:scale-105"
 							/>
 							<div
@@ -103,6 +104,7 @@
 										src={post.authorAvatar ||
 											`https://i.pravatar.cc/50?u=${post.authorName || 'staff'}`}
 										alt={post.authorName || 'Staff Writer'}
+										loading="lazy"
 										class="h-8 w-8 rounded-full object-cover"
 									/>
 									<span class="text-[10px] font-black tracking-wider text-gray-600 uppercase"

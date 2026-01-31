@@ -116,7 +116,59 @@ export function listMarkdownFiles() {
 export async function saveUpload(file) {
     ensureDirectories();
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let buffer = Buffer.from(bytes);
+
+    // Image optimization logic
+    if (file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|avif|tiff|gif)$/i.test(file.name)) {
+        try {
+            const sharp = (await import('sharp')).default;
+            const MAX_SIZE_BYTES = 500 * 1024; // 500KB
+            const MAX_WIDTH = 1920;
+
+            // Only process if larger than limit
+            if (buffer.length > MAX_SIZE_BYTES) {
+                console.log(`[Upload] Optimizing large image: ${file.name} (${(buffer.length / 1024).toFixed(2)} KB)`);
+                let pipeline = sharp(buffer);
+                const metadata = await pipeline.metadata();
+
+                // Resize
+                if (metadata.width > MAX_WIDTH) {
+                    pipeline = pipeline.resize({ width: MAX_WIDTH, withoutEnlargement: true });
+                }
+
+                // Compress
+                let outputBuffer;
+                if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+                    outputBuffer = await pipeline.jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+                } else if (metadata.format === 'png') {
+                    outputBuffer = await pipeline.png({ quality: 80, compressionLevel: 8 }).toBuffer();
+                } else if (metadata.format === 'webp') {
+                    outputBuffer = await pipeline.webp({ quality: 80 }).toBuffer();
+                } else {
+                    outputBuffer = await pipeline.toBuffer();
+                }
+
+                // If still too big, try harder
+                if (outputBuffer.length > MAX_SIZE_BYTES) {
+                    console.log(`[Upload] Still huge, retrying with lower quality...`);
+                    if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+                        outputBuffer = await pipeline.jpeg({ quality: 60, mozjpeg: true }).toBuffer();
+                    } else if (metadata.format === 'png') {
+                        outputBuffer = await pipeline.png({ quality: 60, compressionLevel: 9 }).toBuffer();
+                    } else if (metadata.format === 'webp') {
+                        outputBuffer = await pipeline.webp({ quality: 60 }).toBuffer();
+                    }
+                }
+
+                if (outputBuffer.length < buffer.length) {
+                    console.log(`[Upload] Optimized to ${(outputBuffer.length / 1024).toFixed(2)} KB`);
+                    buffer = outputBuffer;
+                }
+            }
+        } catch (e) {
+            console.error('[Upload] Optimization failed, saving original:', e);
+        }
+    }
 
     // Create a safe filename
     const timestamp = Date.now();
