@@ -2,8 +2,13 @@ import { db, schema } from '$lib/server/db/index.js';
 import { error } from '@sveltejs/kit';
 import { sql, desc, eq, and } from 'drizzle-orm';
 
-export async function load({ params }) {
+export async function load({ params, setHeaders }) {
     const { slug } = params;
+
+    // Disable caching for category pages
+    setHeaders({
+        'cache-control': 'max-age=0, s-maxage=60'
+    });
 
     // Get category info
     const category = db

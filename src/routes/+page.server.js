@@ -16,7 +16,12 @@ function extractVideoUrl(content) {
     return null;
 }
 
-export async function load() {
+export async function load({ setHeaders }) {
+    // Disable caching for the home page to ensure deleted posts disappear immediately
+    setHeaders({
+        'cache-control': 'max-age=0, s-maxage=60'
+    });
+
     // 1. Fetch Popular Posts
     const popularPostsRaw = db
         .select({
