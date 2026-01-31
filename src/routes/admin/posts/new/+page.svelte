@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
 	import TurndownService from 'turndown';
+	import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 	import {
 		ArrowLeft,
 		Save,
@@ -19,7 +20,8 @@
 		Trash2,
 		Heading2,
 		FileCode,
-		FileText
+		FileText,
+		Monitor
 	} from 'lucide-svelte';
 
 	let { data, form } = $props();
@@ -32,7 +34,7 @@
 	let featuredImage = $state(form?.featuredImage ?? '');
 	let showPreview = $state(false);
 
-	// Editor mode: 'markdown' or 'html'
+	// Editor mode: 'markdown', 'html', or 'visual'
 	let editorMode = $state('markdown');
 
 	// Turndown instance for HTML to Markdown conversion
@@ -51,8 +53,19 @@
 	// Switch to Markdown mode - convert HTML to Markdown
 	function switchToMarkdown() {
 		if (editorMode === 'markdown') return;
+		// Visual mode stores HTML, so convert it
 		content = turndownService.turndown(content || '');
 		editorMode = 'markdown';
+	}
+
+	// Switch to Visual (WYSIWYG) mode - convert markdown to HTML first
+	function switchToVisual() {
+		if (editorMode === 'visual') return;
+		if (editorMode === 'markdown') {
+			content = marked(content || '');
+		}
+		// If coming from HTML, content is already HTML
+		editorMode = 'visual';
 	}
 
 	// Markdown preview
@@ -211,6 +224,18 @@
 									<FileCode class="h-3 w-3" />
 									HTML
 								</button>
+								<button
+									type="button"
+									onclick={switchToVisual}
+									class="flex items-center gap-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase transition-colors {editorMode ===
+									'visual'
+										? 'bg-slate-800 text-white'
+										: 'text-slate-600 hover:bg-slate-100'}"
+									title="Visual Editor Mode"
+								>
+									<Monitor class="h-3 w-3" />
+									Visual
+								</button>
 							</div>
 
 							<!-- Markdown Toolbar (only visible in markdown mode) -->
@@ -240,7 +265,15 @@
 						</button>
 					</div>
 
-					{#if showPreview}
+					{#if editorMode === 'visual'}
+						<!-- Visual WYSIWYG Editor -->
+						<RichTextEditor
+							bind:content
+							onImageUpload={handleUpload}
+							placeholder="Start writing your post..."
+						/>
+						<input type="hidden" name="content" value={content} />
+					{:else if showPreview}
 						<div class="prose min-h-[500px] max-w-none p-6 prose-slate">
 							{#if preview}
 								{@html preview}

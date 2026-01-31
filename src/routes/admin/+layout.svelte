@@ -19,8 +19,8 @@
 
 	const menuItems = [
 		{ href: '/admin', icon: LayoutDashboard, label: 'DASHBOARD', exact: true },
-		{ href: '/admin/posts', icon: FileText, label: 'ALL POSTS' },
-		{ href: '/admin/posts/new', icon: PenTool, label: 'NEW POST' },
+		{ href: '/admin/posts', icon: FileText, label: 'ALL POSTS', exact: true },
+		{ href: '/admin/posts/new', icon: PenTool, label: 'NEW POST', exact: true },
 		{ href: '/admin/pages', icon: FileText, label: 'PAGES', adminOnly: true },
 		{ href: '/admin/subscribers', icon: Users, label: 'SUBSCRIBERS', adminOnly: true },
 		{ href: '/admin/comments', icon: PenTool, label: 'COMMENTS' },
