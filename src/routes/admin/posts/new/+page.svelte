@@ -156,7 +156,20 @@
 		method="POST"
 		enctype="multipart/form-data"
 		class="space-y-6"
-		use:enhance={() => {
+		use:enhance={({ formData, cancel }) => {
+			// 1. Safety check: Ensure content is not empty
+			if (!content || content.trim() === '') {
+				if (!confirm('Warning: Post content appears to be empty. Save anyway?')) {
+					cancel();
+					return;
+				}
+			}
+
+			// 2. Ensure formData has the latest content
+			if (!formData.get('content')) {
+				formData.set('content', content);
+			}
+
 			loading = true;
 			return async ({ result, update }) => {
 				loading = false;

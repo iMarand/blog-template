@@ -169,7 +169,22 @@
 		action="?/update"
 		enctype="multipart/form-data"
 		class="space-y-6"
-		use:enhance={({ cancel, submitter }) => {
+		use:enhance={({ formData, cancel, submitter }) => {
+			// 1. Safety check: Ensure content is not empty
+			if (!content || content.trim() === '') {
+				// Try to get content one last time if seemingly empty (though binding should handle it)
+				// If still empty, warn user unless they really want to save empty post
+				if (!confirm('Warning: Post content appears to be empty. Save anyway?')) {
+					cancel();
+					return;
+				}
+			}
+
+			// 2. Ensure formData has the latest content
+			if (!formData.get('content')) {
+				formData.set('content', content);
+			}
+
 			const isDelete = submitter?.formAction?.includes('?/delete');
 
 			if (isDelete) {
@@ -185,8 +200,13 @@
 				loading = false;
 				if (result.type === 'redirect') {
 					goto(result.location);
+				} else if (result.type === 'success') {
+					// Don't run full update() to avoid resetting component state violently
+					// Just confirm success to user
+					// But we DO need to update form prop if we want to show success message
+					await update({ reset: false });
 				} else {
-					await update();
+					await update({ reset: false });
 				}
 			};
 		}}

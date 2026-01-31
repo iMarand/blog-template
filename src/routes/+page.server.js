@@ -95,19 +95,21 @@ export async function load({ setHeaders }) {
         return result;
     }
 
-    // Carousel: Priority is Exclusive
+    // Hero Featured - PRIORITY 1: This must be the user-selected featured post
+    let heroFeatured = enhancedPosts.find(p => p.isFeatured);
+    if (!heroFeatured) {
+        heroFeatured = enhancedPosts[0]; // Fallback to latest
+    }
+    // Always add Hero to shownIds
+    if (heroFeatured) shownIds.add(heroFeatured.id);
+
+    // Carousel: Priority 2 is Exclusive
+    // We filter out the heroFeatured if it was picked
     const carouselPosts = getUniquePosts(enhancedPosts, 4, p => p.isExclusive);
     if (carouselPosts.length < 4) {
         const fillers = getUniquePosts(enhancedPosts, 4 - carouselPosts.length);
         carouselPosts.push(...fillers);
     }
-
-    // Hero Featured
-    let heroFeatured = enhancedPosts.find(p => p.isFeatured && !shownIds.has(p.id));
-    if (!heroFeatured) {
-        heroFeatured = enhancedPosts.find(p => !shownIds.has(p.id)) || enhancedPosts[0];
-    }
-    shownIds.add(heroFeatured.id);
 
     // Fresh Stories
     const freshStories = getUniquePosts(enhancedPosts, 5);
